@@ -1,5 +1,9 @@
 ---
-title: "Untitled"
+title: "MARKET PRICES FORECAST"
+author: 'NADEEM SHAIKH'
+date: "Last Updated: `r format(Sys.time(), '%d, %B, %Y at %H:%M')`"
+
+output_dir: docs
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
@@ -7,11 +11,101 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-library(flexdashboard)
+## load the necessary packages
+source("script/libs.r")
+
+## general options
+#source("script/opt.r")
 ```
 
-Column {data-width=650}
------------------------------------------------------------------------
+```{r global, include=FALSE}
+
+## load the list of symbols, for example 514-ETF tickers
+fileOfSymbols <- "symbols.txt"
+if (file.exists(fileOfSymbols)) {
+  
+  ## read the list of symbols
+  symbols <- readLines(fileOfSymbols)
+  symbols <- sort(symbols)
+  #
+  ## set the name of the binary RDS-file with the history of OHLC-prices
+  fileEnv <- paste0("prices_history_", lubridate::today(), ".rds")
+  #
+  ## initiate an environment
+  if (file.exists(fileEnv)) {
+    env <- readRDS(fileEnv)
+  } else {
+    ## remove all previous *.rds files from the working directory
+    file.remove(list.files(path = ".", pattern = "*.rds"))
+    env <- new.env()
+  }
+}  else {
+  symbols <- 'No symbol list'
+  }
+
+```
+
+# Sidebar {.sidebar}
+
+```{r}
+## Define inputs
+## select a symbol
+selectInput(
+  inputId = "symbol",
+  label   = "Get Prices for the symbol:",
+  choices = symbols,
+  selected = symbols[1]
+)
+
+date_inverval <- c('daily', 'weekly', 'monthly', 'yearly')
+## select a data intervals
+selectInput(
+  inputId = "interval",
+  label   = "Get data interval for the symbol:",
+  choices = date_inverval,
+  selected = date_inverval[1]
+)     
+
+## select a number of years of the price history
+sliderInput(
+  inputId = "nyears",
+  label = "Years of History",
+  min = 0.5,
+  max = 10,
+  value = 2,
+  step = 0.5
+)
+
+## select a number of days in the forecast
+selectInput(
+  inputId = "nfor",
+  label = "Days to Forecast:",
+  choices = c(5, 10, 25, 50, 100),
+  selected = 50
+)
+
+## select the seasonality mode
+selectInput(
+  inputId = "seasonmode",
+  label = "Seasonality mode",
+  choices = c('additive', 'multiplicative'),
+  selected = 'additive'
+)
+
+## select the seasonality prior scale
+sliderInput(
+  inputId = "seasonscale",
+  label = "Seasonality prior scale",
+  min = 0.01,
+  max = 50,
+  value = 10,
+  step = 5
+)
+
+br()
+```
+
+## Column {data-width="650"}
 
 ### Chart A
 
@@ -19,8 +113,7 @@ Column {data-width=650}
 
 ```
 
-Column {data-width=350}
------------------------------------------------------------------------
+## Column {data-width="350"}
 
 ### Chart B
 
@@ -33,4 +126,3 @@ Column {data-width=350}
 ```{r}
 
 ```
-

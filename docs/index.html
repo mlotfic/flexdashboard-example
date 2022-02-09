@@ -5,12 +5,13 @@
 <meta charset="utf-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta name="author" content="NADEEM SHAIKH" />
 
 
 
-<title>Untitled</title>
+<title>MARKET PRICES FORECAST</title>
 
-<meta property="og:title" content="Untitled" />
+<meta property="og:title" content="MARKET PRICES FORECAST" />
 
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' />
 
@@ -21,13 +22,29 @@
 window.FlexDashboardComponents = [];
 </script>
 
-<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="site_libs/header-attrs-2.11/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
 <script src="site_libs/stickytableheaders-0.1.19/jquery.stickytableheaders.min.js"></script>
+<link href="shared/selectize/css/selectize.bootstrap3.css" rel="stylesheet" />
+<script src="shared/selectize/js/selectize.min.js"></script>
+<script src="shared/selectize/accessibility/js/selectize-plugin-a11y.min.js"></script>
+<script src="shared/ionrangeslider/js/ion.rangeSlider.min.js"></script>
+<script src="shared/strftime/strftime-min.js"></script>
+<link href="shared/ionrangeslider/css/ion.rangeSlider.css" rel="stylesheet" />
 <style type="text/css">
 
 /*
@@ -805,9 +822,10 @@ html, body {
   
 </span>
 <span class="navbar-brand">
-  Untitled
+  MARKET PRICES FORECAST
   <span class="navbar-author">
-        </span>
+    NADEEM SHAIKH &mdash; Last Updated: 09, February, 2022 at 20:04
+    </span>
 </span>
 
 </div>
@@ -841,7 +859,8 @@ var FlexDashboard = (function () {
       defaultFigWidthMobile: 360,
       defaultFigHeightMobile: 461,
       isMobile: false,
-      isPortrait: false
+      isPortrait: false,
+      resize_reload: true
     });
   };
 
@@ -894,9 +913,9 @@ var FlexDashboard = (function () {
         globalSidebar.addClass('level3');
         var h1 = globalSidebar.children('h1');
         var h3 = $('<h3></h3>');
-        h3.html(h1.html());
+        h3.append(h1.contents());
         h3.insertBefore(h1);
-        h1.remove();
+        h1.detach();
 
         // move it into the first page
         var page = dashboardContainer.find('.section.level1').first();
@@ -961,16 +980,29 @@ var FlexDashboard = (function () {
     initPrismHighlighting();
 
     // record mobile and orientation state then register a handler
-    // to refresh if it changes
+    // to refresh if resize_reload is set to true and it changes
     _options.isMobile = isMobilePhone();
     _options.isPortrait = isPortrait();
-    $(window).on('resize', function() {
-      if (_options.isMobile !== isMobilePhone() ||
-          _options.isPortrait !== isPortrait()) {
-        window.location.reload();
+    if (_options.resize_reload) {
+      $(window).on('resize', function() {
+        if (_options.isMobile !== isMobilePhone() ||
+            _options.isPortrait !== isPortrait()) {
+          window.location.reload();
+        }
+      });
+    } else {
+      // if in desktop mode and resizing to mobile, make sure the heights are 100%
+      // This enforces what `fillpage.css` does for "wider" pages.
+      // Since we are not reloading once the page becomes small, we need to force the height to 100%
+      // This is a new situation introduced when `_options.resize_reload` is `false`
+      if (! _options.isMobile) {
+        // only add if `fillpage.css` was added in the first place
+        if (_options.fillPage) {
+          // fillpage.css
+          $("html,body,#dashboard").css("height", "100%");
+        }
       }
-    });
-
+    }
     // trigger layoutcomplete event
     dashboardContainer.trigger('flexdashboard:layoutcomplete');
   }
@@ -1082,10 +1114,10 @@ var FlexDashboard = (function () {
     if (active)
       wrapper.addClass('active');
 
-    // get a reference to the h1, discover it's id and title, then remove it
+    // get a reference to the h1, discover its inner contens, then detach it
     var h1 = wrapper.find('h1').first();
-    var title = h1.html();
-    h1.remove();
+    var title = h1.contents();
+    h1.detach();
 
     // create a navbar item
     var li = $('<li></li>');
@@ -1115,7 +1147,14 @@ var FlexDashboard = (function () {
 
       // get the name of the icon set and icon
       var dashPos = icon.indexOf("-");
-      var iconSet = icon.substring(0, dashPos);
+      var iconSet = null;
+      var iconSplit = icon.split(" ");
+      if (iconSplit.length > 1) {
+        iconSet = iconSplit[0];
+        icon = iconSplit.slice(1).join(" ");
+      } else {
+        iconSet = icon.substring(0, dashPos);
+      }
       var iconName = icon.substring(dashPos + 1);
 
       // create the icon
@@ -1216,9 +1255,9 @@ var FlexDashboard = (function () {
       sidebar.wrapInner('<div class="section level3"></div>');
       var h2 = sidebar.find('h2');
       var h3 = $('<h3></h3>');
-      h3.html(h2.html());
+      h3.append(h2.contents());
       h3.insertBefore(h2);
-      h2.remove();
+      h2.detach();
 
       // wipeout h2 elements then enclose them in a single h2
       var level2 = page.find('div.section.level2');
@@ -1360,8 +1399,8 @@ var FlexDashboard = (function () {
       // extract the title from the h3
       var li = $('<li></li>');
       var h3 = frame.children('h3');
-      li.html(h3.html());
-      h3.remove();
+      li.append(h3.contents());
+      h3.detach();
       ul.append(li);
 
       // extract commentary
@@ -1757,7 +1796,7 @@ var FlexDashboard = (function () {
 
     // add the title
     var chartTitle = $('<div class="chart-title"></div>');
-    chartTitle.html(title);
+    chartTitle.append(title);
     chart.prepend(chartTitle);
 
     // add the notes section
@@ -1813,10 +1852,11 @@ var FlexDashboard = (function () {
 
       // get the heading element within it and grab it's text
       var heading = tab.find('h' + tabLevel + ':first');
-      var headingText = heading.html();
+      var headingDom = heading.contents();
 
       // build and append the tab list item
-      var a = $('<a role="tab" data-toggle="tab">' + headingText + '</a>');
+      var a = $('<a role="tab" data-toggle="tab"></a>');
+      a.append(headingDom);
       a.attr('href', '#' + id);
       a.attr('aria-controls', id);
       var li = $('<li role="presentation"></li>');
@@ -1939,8 +1979,8 @@ var FlexDashboard = (function () {
     var h3 = container.children('h3').first();
     var title = '';
     if (!container.hasClass('no-title'))
-      title = h3.html();
-    h3.remove();
+      title = h3.contents();
+    h3.detach();
     return title;
   }
 
@@ -1951,11 +1991,11 @@ var FlexDashboard = (function () {
     var caption = chartContent.children('div.image-container')
                               .children('p.caption');
     if (blockquote.length) {
-      chartNotes.html(blockquote.children('p:first-child').html());
+      chartNotes.empty().append(blockquote.children('p:first-child').contents());
       blockquote.remove();
       return true;
     } else if (caption.length) {
-      chartNotes.html(caption.html());
+      chartNotes.empty().append(caption.contents());
       caption.remove();
       return true;
     } else {
@@ -2015,14 +2055,14 @@ var FlexDashboard = (function () {
   function handleLocationHash() {
 
     // restore tab/page from bookmark
-    var hash = window.location.hash;
+    var hash = window.decodeURIComponent(window.location.hash);
     if (hash.length > 0)
       $('ul.nav a[href="' + hash + '"]').tab('show');
     FlexDashboardUtils.manageActiveNavbarMenu();
 
     // navigate to a tab when the history changes
     window.addEventListener("popstate", function(e) {
-      var hash = window.location.hash;
+      var hash = window.decodeURIComponent(window.location.hash);
       var activeTab = $('ul.nav a[href="' + hash + '"]');
       if (activeTab.length) {
         activeTab.tab('show');
@@ -2485,7 +2525,7 @@ window.FlexDashboardComponents.push({
 
     // caption
     var caption = $('<p class="caption"></p>');
-    caption.html(chartTitle);
+    caption.append(chartTitle);
 
     // build inner div for value box and add it
     var inner = $('<div class="inner"></div>');
@@ -2498,9 +2538,15 @@ window.FlexDashboardComponents.push({
     valueBox.append(icon);
     function setIcon(chartIcon) {
       var iconLib = "";
-      var components = chartIcon.split("-");
-      if (components.length > 1)
-        iconLib = components[0];
+      var iconSplit = chartIcon.split(" ");
+      if (iconSplit.length > 1) {
+        iconLib = iconSplit[0];
+        chartIcon = iconSplit.slice(1).join(" ");
+      } else {
+        var components = chartIcon.split("-");
+        if (components.length > 1)
+          iconLib = components[0];
+      }
       icon.children('i').attr('class', iconLib + ' ' + chartIcon);
     }
     var chartIcon = valueBox.attr('data-icon');
@@ -2554,7 +2600,8 @@ window.FlexDashboardComponents.push({
       var dataHref = valueOutput.attr('data-href');
       if (dataHref) {
         valueBox.addClass('linked-value');
-        valueBox.on('click', function(e) {
+        valueBox.off('click.value-box');
+        valueBox.on('click.value-box', function(e) {
           window.FlexDashboardUtils.showLinkedValue(dataHref);
         });
       }
@@ -2579,12 +2626,1805 @@ window.FlexDashboardComponents.push({
     );
   }
 });
-
-
 </script>
 
 <div id="dashboard-container">
 
+<div id="sidebar" class="section level1 sidebar">
+<h1 class="sidebar">Sidebar</h1>
+<div class="knitr-options" data-fig-width="576" data-fig-height="460">
+
+</div>
+<div class="form-group shiny-input-container">
+<label class="control-label" id="symbol-label" for="symbol">Get Prices for the symbol:</label>
+<div>
+<select id="symbol"><option value="^BSESN" selected>^BSESN</option>
+<option value="^DJI">^DJI</option>
+<option value="^IXIC">^IXIC</option>
+<option value="^NSEBANK">^NSEBANK</option>
+<option value="^NSEI">^NSEI</option>
+<option value="20MICRONS.NS">20MICRONS.NS</option>
+<option value="21STCENMGM.NS">21STCENMGM.NS</option>
+<option value="3MINDIA.NS">3MINDIA.NS</option>
+<option value="3PLAND.NS">3PLAND.NS</option>
+<option value="5PAISA.NS">5PAISA.NS</option>
+<option value="63MOONS.NS">63MOONS.NS</option>
+<option value="A2ZINFRA.NS">A2ZINFRA.NS</option>
+<option value="AAKASH.NS">AAKASH.NS</option>
+<option value="AAREYDRUGS.NS">AAREYDRUGS.NS</option>
+<option value="AARON.NS">AARON.NS</option>
+<option value="AARTIDRUGS.NS">AARTIDRUGS.NS</option>
+<option value="AARTIIND.NS">AARTIIND.NS</option>
+<option value="AARTISURF.NS">AARTISURF.NS</option>
+<option value="AARVEEDEN.NS">AARVEEDEN.NS</option>
+<option value="AARVI.NS">AARVI.NS</option>
+<option value="AAVAS.NS">AAVAS.NS</option>
+<option value="ABAN.NS">ABAN.NS</option>
+<option value="ABB.NS">ABB.NS</option>
+<option value="ABBOTINDIA.NS">ABBOTINDIA.NS</option>
+<option value="ABCAPITAL.NS">ABCAPITAL.NS</option>
+<option value="ABFRL.NS">ABFRL.NS</option>
+<option value="ABMINTLLTD.NS">ABMINTLLTD.NS</option>
+<option value="ABSLAMC.NS">ABSLAMC.NS</option>
+<option value="ACC.NS">ACC.NS</option>
+<option value="ACCELYA.NS">ACCELYA.NS</option>
+<option value="ACCURACY.NS">ACCURACY.NS</option>
+<option value="ACE.NS">ACE.NS</option>
+<option value="ACRYSIL.NS">ACRYSIL.NS</option>
+<option value="ADANIENT.NS">ADANIENT.NS</option>
+<option value="ADANIGREEN.NS">ADANIGREEN.NS</option>
+<option value="ADANIPORTS.NS">ADANIPORTS.NS</option>
+<option value="ADANIPOWER.NS">ADANIPOWER.NS</option>
+<option value="ADANITRANS.NS">ADANITRANS.NS</option>
+<option value="ADFFOODS.NS">ADFFOODS.NS</option>
+<option value="ADL.NS">ADL.NS</option>
+<option value="ADORWELD.NS">ADORWELD.NS</option>
+<option value="ADROITINFO.NS">ADROITINFO.NS</option>
+<option value="ADSL.NS">ADSL.NS</option>
+<option value="ADVANIHOTR.NS">ADVANIHOTR.NS</option>
+<option value="ADVENZYMES.NS">ADVENZYMES.NS</option>
+<option value="AEGISCHEM.NS">AEGISCHEM.NS</option>
+<option value="AFFLE.NS">AFFLE.NS</option>
+<option value="AGARIND.NS">AGARIND.NS</option>
+<option value="AGCNET.NS">AGCNET.NS</option>
+<option value="AGRITECH.NS">AGRITECH.NS</option>
+<option value="AGROPHOS.NS">AGROPHOS.NS</option>
+<option value="AHLADA.NS">AHLADA.NS</option>
+<option value="AHLEAST.NS">AHLEAST.NS</option>
+<option value="AHLUCONT.NS">AHLUCONT.NS</option>
+<option value="AHLWEST.NS">AHLWEST.NS</option>
+<option value="AIAENG.NS">AIAENG.NS</option>
+<option value="AIRAN.NS">AIRAN.NS</option>
+<option value="AIROLAM.NS">AIROLAM.NS</option>
+<option value="AIRTEL-RE.NS">AIRTEL-RE.NS</option>
+<option value="AJANTPHARM.NS">AJANTPHARM.NS</option>
+<option value="AJMERA.NS">AJMERA.NS</option>
+<option value="AJOONI.NS">AJOONI.NS</option>
+<option value="AJRINFRA.NS">AJRINFRA.NS</option>
+<option value="AKASH.NS">AKASH.NS</option>
+<option value="AKG.NS">AKG.NS</option>
+<option value="AKSHARCHEM.NS">AKSHARCHEM.NS</option>
+<option value="AKSHOPTFBR.NS">AKSHOPTFBR.NS</option>
+<option value="AKZOINDIA.NS">AKZOINDIA.NS</option>
+<option value="ALANKIT.NS">ALANKIT.NS</option>
+<option value="ALBERTDAVD.NS">ALBERTDAVD.NS</option>
+<option value="ALEMBICLTD.NS">ALEMBICLTD.NS</option>
+<option value="ALICON.NS">ALICON.NS</option>
+<option value="ALKALI.NS">ALKALI.NS</option>
+<option value="ALKEM.NS">ALKEM.NS</option>
+<option value="ALKYLAMINE.NS">ALKYLAMINE.NS</option>
+<option value="ALLCARGO.NS">ALLCARGO.NS</option>
+<option value="ALLSEC.NS">ALLSEC.NS</option>
+<option value="ALMONDZ.NS">ALMONDZ.NS</option>
+<option value="ALOKINDS.NS">ALOKINDS.NS</option>
+<option value="ALPA.NS">ALPA.NS</option>
+<option value="ALPHAGEO.NS">ALPHAGEO.NS</option>
+<option value="ALPSINDUS.NS">ALPSINDUS.NS</option>
+<option value="AMARAJABAT.NS">AMARAJABAT.NS</option>
+<option value="AMBER.NS">AMBER.NS</option>
+<option value="AMBICAAGAR.NS">AMBICAAGAR.NS</option>
+<option value="AMBIKCO.NS">AMBIKCO.NS</option>
+<option value="AMBUJACEM.NS">AMBUJACEM.NS</option>
+<option value="AMDIND.NS">AMDIND.NS</option>
+<option value="AMIORG.NS">AMIORG.NS</option>
+<option value="AMJLAND.NS">AMJLAND.NS</option>
+<option value="AMRUTANJAN.NS">AMRUTANJAN.NS</option>
+<option value="ANANTRAJ.NS">ANANTRAJ.NS</option>
+<option value="ANDHRACEMT.NS">ANDHRACEMT.NS</option>
+<option value="ANDHRAPAP.NS">ANDHRAPAP.NS</option>
+<option value="ANDHRSUGAR.NS">ANDHRSUGAR.NS</option>
+<option value="ANDREWYU.NS">ANDREWYU.NS</option>
+<option value="ANGELBRKG.NS">ANGELBRKG.NS</option>
+<option value="ANIKINDS.NS">ANIKINDS.NS</option>
+<option value="ANKITMETAL.NS">ANKITMETAL.NS</option>
+<option value="ANMOL.NS">ANMOL.NS</option>
+<option value="ANSALAPI.NS">ANSALAPI.NS</option>
+<option value="ANSALHSG.NS">ANSALHSG.NS</option>
+<option value="ANTGRAPHIC.NS">ANTGRAPHIC.NS</option>
+<option value="ANUP.NS">ANUP.NS</option>
+<option value="ANURAS.NS">ANURAS.NS</option>
+<option value="APARINDS.NS">APARINDS.NS</option>
+<option value="APCL.NS">APCL.NS</option>
+<option value="APCOTEXIND.NS">APCOTEXIND.NS</option>
+<option value="APEX.NS">APEX.NS</option>
+<option value="APLAPOLLO.NS">APLAPOLLO.NS</option>
+<option value="APLLTD.NS">APLLTD.NS</option>
+<option value="APOLLO.NS">APOLLO.NS</option>
+<option value="APOLLOHOSP.NS">APOLLOHOSP.NS</option>
+<option value="APOLLOPIPE.NS">APOLLOPIPE.NS</option>
+<option value="APOLLOTYRE.NS">APOLLOTYRE.NS</option>
+<option value="APOLSINHOT.NS">APOLSINHOT.NS</option>
+<option value="APTECHT.NS">APTECHT.NS</option>
+<option value="APTUS.NS">APTUS.NS</option>
+<option value="ARCHIDPLY.NS">ARCHIDPLY.NS</option>
+<option value="ARCHIES.NS">ARCHIES.NS</option>
+<option value="ARENTERP.NS">ARENTERP.NS</option>
+<option value="ARIES.NS">ARIES.NS</option>
+<option value="ARIHANT.NS">ARIHANT.NS</option>
+<option value="ARIHANTCAP.NS">ARIHANTCAP.NS</option>
+<option value="ARIHANTSUP.NS">ARIHANTSUP.NS</option>
+<option value="ARMANFIN.NS">ARMANFIN.NS</option>
+<option value="AROGRANITE.NS">AROGRANITE.NS</option>
+<option value="ARROWGREEN.NS">ARROWGREEN.NS</option>
+<option value="ARSHIYA.NS">ARSHIYA.NS</option>
+<option value="ARSSINFRA.NS">ARSSINFRA.NS</option>
+<option value="ARTEMISMED.NS">ARTEMISMED.NS</option>
+<option value="ARTNIRMAN.NS">ARTNIRMAN.NS</option>
+<option value="ARVEE.NS">ARVEE.NS</option>
+<option value="ARVIND.NS">ARVIND.NS</option>
+<option value="ARVINDFASN.NS">ARVINDFASN.NS</option>
+<option value="ARVSMART.NS">ARVSMART.NS</option>
+<option value="ASAHIINDIA.NS">ASAHIINDIA.NS</option>
+<option value="ASAHISONG.NS">ASAHISONG.NS</option>
+<option value="ASAL.NS">ASAL.NS</option>
+<option value="ASALCBR.NS">ASALCBR.NS</option>
+<option value="ASHAPURMIN.NS">ASHAPURMIN.NS</option>
+<option value="ASHIANA.NS">ASHIANA.NS</option>
+<option value="ASHIMASYN.NS">ASHIMASYN.NS</option>
+<option value="ASHOKA.NS">ASHOKA.NS</option>
+<option value="ASHOKLEY.NS">ASHOKLEY.NS</option>
+<option value="ASIANHOTNR.NS">ASIANHOTNR.NS</option>
+<option value="ASIANPAINT.NS">ASIANPAINT.NS</option>
+<option value="ASIANTILES.NS">ASIANTILES.NS</option>
+<option value="ASPINWALL.NS">ASPINWALL.NS</option>
+<option value="ASTEC.NS">ASTEC.NS</option>
+<option value="ASTERDM.NS">ASTERDM.NS</option>
+<option value="ASTRAL.NS">ASTRAL.NS</option>
+<option value="ASTRAMICRO.NS">ASTRAMICRO.NS</option>
+<option value="ASTRAZEN.NS">ASTRAZEN.NS</option>
+<option value="ASTRON.NS">ASTRON.NS</option>
+<option value="ATFL.NS">ATFL.NS</option>
+<option value="ATGL.NS">ATGL.NS</option>
+<option value="ATLANTA.NS">ATLANTA.NS</option>
+<option value="ATUL.NS">ATUL.NS</option>
+<option value="ATULAUTO.NS">ATULAUTO.NS</option>
+<option value="AUBANK.NS">AUBANK.NS</option>
+<option value="AURIONPRO.NS">AURIONPRO.NS</option>
+<option value="AUROPHARMA.NS">AUROPHARMA.NS</option>
+<option value="AUSOMENT.NS">AUSOMENT.NS</option>
+<option value="AUTOAXLES.NS">AUTOAXLES.NS</option>
+<option value="AUTOIND.NS">AUTOIND.NS</option>
+<option value="AVADHSUGAR.NS">AVADHSUGAR.NS</option>
+<option value="AVANTIFEED.NS">AVANTIFEED.NS</option>
+<option value="AVTNPL.NS">AVTNPL.NS</option>
+<option value="AWHCL.NS">AWHCL.NS</option>
+<option value="AXISBANK.NS">AXISBANK.NS</option>
+<option value="AXISCADES.NS">AXISCADES.NS</option>
+<option value="AYMSYNTEX.NS">AYMSYNTEX.NS</option>
+<option value="BAFNAPH.NS">BAFNAPH.NS</option>
+<option value="BAGFILMS.NS">BAGFILMS.NS</option>
+<option value="BAJAJ-AUTO.NS">BAJAJ-AUTO.NS</option>
+<option value="BAJAJCON.NS">BAJAJCON.NS</option>
+<option value="BAJAJELEC.NS">BAJAJELEC.NS</option>
+<option value="BAJAJFINSV.NS">BAJAJFINSV.NS</option>
+<option value="BAJAJHIND.NS">BAJAJHIND.NS</option>
+<option value="BAJAJHLDNG.NS">BAJAJHLDNG.NS</option>
+<option value="BAJFINANCE.NS">BAJFINANCE.NS</option>
+<option value="BALAJITELE.NS">BALAJITELE.NS</option>
+<option value="BALAMINES.NS">BALAMINES.NS</option>
+<option value="BALAXI.NS">BALAXI.NS</option>
+<option value="BALKRISHNA.NS">BALKRISHNA.NS</option>
+<option value="BALKRISIND.NS">BALKRISIND.NS</option>
+<option value="BALLARPUR.NS">BALLARPUR.NS</option>
+<option value="BALMLAWRIE.NS">BALMLAWRIE.NS</option>
+<option value="BALPHARMA.NS">BALPHARMA.NS</option>
+<option value="BALRAMCHIN.NS">BALRAMCHIN.NS</option>
+<option value="BANARBEADS.NS">BANARBEADS.NS</option>
+<option value="BANARISUG.NS">BANARISUG.NS</option>
+<option value="BANCOINDIA.NS">BANCOINDIA.NS</option>
+<option value="BANDHANBNK.NS">BANDHANBNK.NS</option>
+<option value="BANG.NS">BANG.NS</option>
+<option value="BANKA.NS">BANKA.NS</option>
+<option value="BANKBARODA.NS">BANKBARODA.NS</option>
+<option value="BANKINDIA.NS">BANKINDIA.NS</option>
+<option value="BANSWRAS.NS">BANSWRAS.NS</option>
+<option value="BARBEQUE.NS">BARBEQUE.NS</option>
+<option value="BARTRONICS.NS">BARTRONICS.NS</option>
+<option value="BASF.NS">BASF.NS</option>
+<option value="BASML.NS">BASML.NS</option>
+<option value="BATAINDIA.NS">BATAINDIA.NS</option>
+<option value="BAYERCROP.NS">BAYERCROP.NS</option>
+<option value="BBL.NS">BBL.NS</option>
+<option value="BBTC.NS">BBTC.NS</option>
+<option value="BCG.NS">BCG.NS</option>
+<option value="BCLIND.NS">BCLIND.NS</option>
+<option value="BCP.NS">BCP.NS</option>
+<option value="BDL.NS">BDL.NS</option>
+<option value="BEARDSELL.NS">BEARDSELL.NS</option>
+<option value="BECTORFOOD.NS">BECTORFOOD.NS</option>
+<option value="BEDMUTHA.NS">BEDMUTHA.NS</option>
+<option value="BEL.NS">BEL.NS</option>
+<option value="BEML.NS">BEML.NS</option>
+<option value="BEPL.NS">BEPL.NS</option>
+<option value="BERGEPAINT.NS">BERGEPAINT.NS</option>
+<option value="BESTAGRO.NS">BESTAGRO.NS</option>
+<option value="BFINVEST.NS">BFINVEST.NS</option>
+<option value="BFUTILITIE.NS">BFUTILITIE.NS</option>
+<option value="BGRENERGY.NS">BGRENERGY.NS</option>
+<option value="BHAGCHEM.NS">BHAGCHEM.NS</option>
+<option value="BHAGERIA.NS">BHAGERIA.NS</option>
+<option value="BHAGYANGR.NS">BHAGYANGR.NS</option>
+<option value="BHAGYAPROP.NS">BHAGYAPROP.NS</option>
+<option value="BHANDARI.NS">BHANDARI.NS</option>
+<option value="BHARATFORG.NS">BHARATFORG.NS</option>
+<option value="BHARATGEAR.NS">BHARATGEAR.NS</option>
+<option value="BHARATRAS.NS">BHARATRAS.NS</option>
+<option value="BHARATWIRE.NS">BHARATWIRE.NS</option>
+<option value="BHARTIARTL.NS">BHARTIARTL.NS</option>
+<option value="BHEL.NS">BHEL.NS</option>
+<option value="BIGBLOC.NS">BIGBLOC.NS</option>
+<option value="BIL.NS">BIL.NS</option>
+<option value="BINDALAGRO.NS">BINDALAGRO.NS</option>
+<option value="BIOCON.NS">BIOCON.NS</option>
+<option value="BIOFILCHEM.NS">BIOFILCHEM.NS</option>
+<option value="BIRLACABLE.NS">BIRLACABLE.NS</option>
+<option value="BIRLACORPN.NS">BIRLACORPN.NS</option>
+<option value="BIRLAMONEY.NS">BIRLAMONEY.NS</option>
+<option value="BIRLATYRE.NS">BIRLATYRE.NS</option>
+<option value="BKMINDST.NS">BKMINDST.NS</option>
+<option value="BLBLIMITED.NS">BLBLIMITED.NS</option>
+<option value="BLISSGVS.NS">BLISSGVS.NS</option>
+<option value="BLKASHYAP.NS">BLKASHYAP.NS</option>
+<option value="BLS.NS">BLS.NS</option>
+<option value="BLUECHIP.NS">BLUECHIP.NS</option>
+<option value="BLUECOAST.NS">BLUECOAST.NS</option>
+<option value="BLUEDART.NS">BLUEDART.NS</option>
+<option value="BLUESTARCO.NS">BLUESTARCO.NS</option>
+<option value="BODALCHEM.NS">BODALCHEM.NS</option>
+<option value="BOMDYEING.NS">BOMDYEING.NS</option>
+<option value="BOROLTD.NS">BOROLTD.NS</option>
+<option value="BORORENEW.NS">BORORENEW.NS</option>
+<option value="BOSCHLTD.NS">BOSCHLTD.NS</option>
+<option value="BPCL.NS">BPCL.NS</option>
+<option value="BPL.NS">BPL.NS</option>
+<option value="BRFL.NS">BRFL.NS</option>
+<option value="BRIGADE.NS">BRIGADE.NS</option>
+<option value="BRITANNIA.NS">BRITANNIA.NS</option>
+<option value="BRNL.NS">BRNL.NS</option>
+<option value="BROOKS.NS">BROOKS.NS</option>
+<option value="BSE.NS">BSE.NS</option>
+<option value="BSHSL.NS">BSHSL.NS</option>
+<option value="BSL.NS">BSL.NS</option>
+<option value="BSOFT.NS">BSOFT.NS</option>
+<option value="BTC-USD">BTC-USD</option>
+<option value="BURGERKING.NS">BURGERKING.NS</option>
+<option value="BURNPUR.NS">BURNPUR.NS</option>
+<option value="BUTTERFLY.NS">BUTTERFLY.NS</option>
+<option value="BVCL.NS">BVCL.NS</option>
+<option value="BYKE.NS">BYKE.NS</option>
+<option value="CADILAHC.NS">CADILAHC.NS</option>
+<option value="CALSOFT.NS">CALSOFT.NS</option>
+<option value="CAMLINFINE.NS">CAMLINFINE.NS</option>
+<option value="CAMS.NS">CAMS.NS</option>
+<option value="CANBK.NS">CANBK.NS</option>
+<option value="CANDC.NS">CANDC.NS</option>
+<option value="CANFINHOME.NS">CANFINHOME.NS</option>
+<option value="CANTABIL.NS">CANTABIL.NS</option>
+<option value="CAPACITE.NS">CAPACITE.NS</option>
+<option value="CAPLIPOINT.NS">CAPLIPOINT.NS</option>
+<option value="CAPTRUST.NS">CAPTRUST.NS</option>
+<option value="CARBORUNIV.NS">CARBORUNIV.NS</option>
+<option value="CAREERP.NS">CAREERP.NS</option>
+<option value="CARERATING.NS">CARERATING.NS</option>
+<option value="CARTRADE.NS">CARTRADE.NS</option>
+<option value="CASTROLIND.NS">CASTROLIND.NS</option>
+<option value="CCCL.NS">CCCL.NS</option>
+<option value="CCHHL.NS">CCHHL.NS</option>
+<option value="CCL.NS">CCL.NS</option>
+<option value="CDSL.NS">CDSL.NS</option>
+<option value="CEATLTD.NS">CEATLTD.NS</option>
+<option value="CEBBCO.NS">CEBBCO.NS</option>
+<option value="CELEBRITY.NS">CELEBRITY.NS</option>
+<option value="CENTENKA.NS">CENTENKA.NS</option>
+<option value="CENTEXT.NS">CENTEXT.NS</option>
+<option value="CENTRALBK.NS">CENTRALBK.NS</option>
+<option value="CENTRUM.NS">CENTRUM.NS</option>
+<option value="CENTUM.NS">CENTUM.NS</option>
+<option value="CENTURYPLY.NS">CENTURYPLY.NS</option>
+<option value="CENTURYTEX.NS">CENTURYTEX.NS</option>
+<option value="CERA.NS">CERA.NS</option>
+<option value="CEREBRAINT.NS">CEREBRAINT.NS</option>
+<option value="CESC.NS">CESC.NS</option>
+<option value="CGCL.NS">CGCL.NS</option>
+<option value="CGPOWER.NS">CGPOWER.NS</option>
+<option value="CHALET.NS">CHALET.NS</option>
+<option value="CHAMBLFERT.NS">CHAMBLFERT.NS</option>
+<option value="CHEMBOND.NS">CHEMBOND.NS</option>
+<option value="CHEMCON.NS">CHEMCON.NS</option>
+<option value="CHEMFAB.NS">CHEMFAB.NS</option>
+<option value="CHEMPLASTS.NS">CHEMPLASTS.NS</option>
+<option value="CHENNPETRO.NS">CHENNPETRO.NS</option>
+<option value="CHOLAFIN.NS">CHOLAFIN.NS</option>
+<option value="CHOLAHLDNG.NS">CHOLAHLDNG.NS</option>
+<option value="CIGNITITEC.NS">CIGNITITEC.NS</option>
+<option value="CINELINE.NS">CINELINE.NS</option>
+<option value="CINEVISTA.NS">CINEVISTA.NS</option>
+<option value="CIPLA.NS">CIPLA.NS</option>
+<option value="CLEAN.NS">CLEAN.NS</option>
+<option value="CLEDUCATE.NS">CLEDUCATE.NS</option>
+<option value="CLNINDIA.NS">CLNINDIA.NS</option>
+<option value="CLSEL.NS">CLSEL.NS</option>
+<option value="CMICABLES.NS">CMICABLES.NS</option>
+<option value="COALINDIA.NS">COALINDIA.NS</option>
+<option value="COASTCORP.NS">COASTCORP.NS</option>
+<option value="COCHINSHIP.NS">COCHINSHIP.NS</option>
+<option value="COFFEEDAY.NS">COFFEEDAY.NS</option>
+<option value="COFORGE.NS">COFORGE.NS</option>
+<option value="COLPAL.NS">COLPAL.NS</option>
+<option value="COMPINFO.NS">COMPINFO.NS</option>
+<option value="COMPUSOFT.NS">COMPUSOFT.NS</option>
+<option value="CONCOR.NS">CONCOR.NS</option>
+<option value="CONFIPET.NS">CONFIPET.NS</option>
+<option value="CONSOFINVT.NS">CONSOFINVT.NS</option>
+<option value="CONTROLPR.NS">CONTROLPR.NS</option>
+<option value="CORALFINAC.NS">CORALFINAC.NS</option>
+<option value="CORDSCABLE.NS">CORDSCABLE.NS</option>
+<option value="COROMANDEL.NS">COROMANDEL.NS</option>
+<option value="COSMOFILMS.NS">COSMOFILMS.NS</option>
+<option value="COUNCODOS.NS">COUNCODOS.NS</option>
+<option value="COX&amp;KINGS.NS">COX&amp;KINGS.NS</option>
+<option value="CRAFTSMAN.NS">CRAFTSMAN.NS</option>
+<option value="CREATIVE.NS">CREATIVE.NS</option>
+<option value="CREATIVEYE.NS">CREATIVEYE.NS</option>
+<option value="CREDITACC.NS">CREDITACC.NS</option>
+<option value="CREST.NS">CREST.NS</option>
+<option value="CRISIL.NS">CRISIL.NS</option>
+<option value="CROMPTON.NS">CROMPTON.NS</option>
+<option value="CSBBANK.NS">CSBBANK.NS</option>
+<option value="CTE.NS">CTE.NS</option>
+<option value="CUB.NS">CUB.NS</option>
+<option value="CUBEXTUB.NS">CUBEXTUB.NS</option>
+<option value="CUMMINSIND.NS">CUMMINSIND.NS</option>
+<option value="CUPID.NS">CUPID.NS</option>
+<option value="CYBERMEDIA.NS">CYBERMEDIA.NS</option>
+<option value="CYBERTECH.NS">CYBERTECH.NS</option>
+<option value="CYIENT.NS">CYIENT.NS</option>
+<option value="DAAWAT.NS">DAAWAT.NS</option>
+<option value="DABUR.NS">DABUR.NS</option>
+<option value="DALBHARAT.NS">DALBHARAT.NS</option>
+<option value="DALMIASUG.NS">DALMIASUG.NS</option>
+<option value="DAMODARIND.NS">DAMODARIND.NS</option>
+<option value="DANGEE.NS">DANGEE.NS</option>
+<option value="DATAMATICS.NS">DATAMATICS.NS</option>
+<option value="DBCORP.NS">DBCORP.NS</option>
+<option value="DBL.NS">DBL.NS</option>
+<option value="DBREALTY.NS">DBREALTY.NS</option>
+<option value="DBSTOCKBRO.NS">DBSTOCKBRO.NS</option>
+<option value="DCAL.NS">DCAL.NS</option>
+<option value="DCBBANK.NS">DCBBANK.NS</option>
+<option value="DCM.NS">DCM.NS</option>
+<option value="DCMFINSERV.NS">DCMFINSERV.NS</option>
+<option value="DCMNVL.NS">DCMNVL.NS</option>
+<option value="DCMSHRIRAM.NS">DCMSHRIRAM.NS</option>
+<option value="DCW.NS">DCW.NS</option>
+<option value="DECCANCE.NS">DECCANCE.NS</option>
+<option value="DEEPAKFERT.NS">DEEPAKFERT.NS</option>
+<option value="DEEPAKNTR.NS">DEEPAKNTR.NS</option>
+<option value="DEEPENR.NS">DEEPENR.NS</option>
+<option value="DEEPINDS.NS">DEEPINDS.NS</option>
+<option value="DELPHIFX.NS">DELPHIFX.NS</option>
+<option value="DELTACORP.NS">DELTACORP.NS</option>
+<option value="DELTAMAGNT.NS">DELTAMAGNT.NS</option>
+<option value="DEN.NS">DEN.NS</option>
+<option value="DENORA.NS">DENORA.NS</option>
+<option value="DEVYANI.NS">DEVYANI.NS</option>
+<option value="DFMFOODS.NS">DFMFOODS.NS</option>
+<option value="DGCONTENT.NS">DGCONTENT.NS</option>
+<option value="DHAMPURSUG.NS">DHAMPURSUG.NS</option>
+<option value="DHANBANK.NS">DHANBANK.NS</option>
+<option value="DHANI.NS">DHANI.NS</option>
+<option value="DHANUKA.NS">DHANUKA.NS</option>
+<option value="DHARSUGAR.NS">DHARSUGAR.NS</option>
+<option value="DHUNINV.NS">DHUNINV.NS</option>
+<option value="DIAMONDYD.NS">DIAMONDYD.NS</option>
+<option value="DIAPOWER.NS">DIAPOWER.NS</option>
+<option value="DICIND.NS">DICIND.NS</option>
+<option value="DIGISPICE.NS">DIGISPICE.NS</option>
+<option value="DIGJAMLMTD.NS">DIGJAMLMTD.NS</option>
+<option value="DISHTV.NS">DISHTV.NS</option>
+<option value="DIVISLAB.NS">DIVISLAB.NS</option>
+<option value="DIXON.NS">DIXON.NS</option>
+<option value="DLF.NS">DLF.NS</option>
+<option value="DLINKINDIA.NS">DLINKINDIA.NS</option>
+<option value="DMART.NS">DMART.NS</option>
+<option value="DNAMEDIA.NS">DNAMEDIA.NS</option>
+<option value="DODLA.NS">DODLA.NS</option>
+<option value="DOLAT.NS">DOLAT.NS</option>
+<option value="DOLLAR.NS">DOLLAR.NS</option>
+<option value="DONEAR.NS">DONEAR.NS</option>
+<option value="DPABHUSHAN.NS">DPABHUSHAN.NS</option>
+<option value="DPSCLTD.NS">DPSCLTD.NS</option>
+<option value="DPWIRES.NS">DPWIRES.NS</option>
+<option value="DRCSYSTEMS.NS">DRCSYSTEMS.NS</option>
+<option value="DREDGECORP.NS">DREDGECORP.NS</option>
+<option value="DRREDDY.NS">DRREDDY.NS</option>
+<option value="DSSL.NS">DSSL.NS</option>
+<option value="DTIL.NS">DTIL.NS</option>
+<option value="DUCON.NS">DUCON.NS</option>
+<option value="DVL.NS">DVL.NS</option>
+<option value="DWARKESH.NS">DWARKESH.NS</option>
+<option value="DYNAMATECH.NS">DYNAMATECH.NS</option>
+<option value="DYNPRO.NS">DYNPRO.NS</option>
+<option value="EASEMYTRIP.NS">EASEMYTRIP.NS</option>
+<option value="EASTSILK.NS">EASTSILK.NS</option>
+<option value="EASUNREYRL.NS">EASUNREYRL.NS</option>
+<option value="ECLERX.NS">ECLERX.NS</option>
+<option value="EDELWEISS.NS">EDELWEISS.NS</option>
+<option value="EDUCOMP.NS">EDUCOMP.NS</option>
+<option value="EICHERMOT.NS">EICHERMOT.NS</option>
+<option value="EIDPARRY.NS">EIDPARRY.NS</option>
+<option value="EIFFL.NS">EIFFL.NS</option>
+<option value="EIHAHOTELS.NS">EIHAHOTELS.NS</option>
+<option value="EIHOTEL.NS">EIHOTEL.NS</option>
+<option value="EIMCOELECO.NS">EIMCOELECO.NS</option>
+<option value="EKC.NS">EKC.NS</option>
+<option value="ELECON.NS">ELECON.NS</option>
+<option value="ELECTCAST.NS">ELECTCAST.NS</option>
+<option value="ELECTHERM.NS">ELECTHERM.NS</option>
+<option value="ELGIEQUIP.NS">ELGIEQUIP.NS</option>
+<option value="ELGIRUBCO.NS">ELGIRUBCO.NS</option>
+<option value="EMAMILTD.NS">EMAMILTD.NS</option>
+<option value="EMAMIPAP.NS">EMAMIPAP.NS</option>
+<option value="EMAMIREAL.NS">EMAMIREAL.NS</option>
+<option value="EMCO.NS">EMCO.NS</option>
+<option value="EMKAY.NS">EMKAY.NS</option>
+<option value="EMMBI.NS">EMMBI.NS</option>
+<option value="ENDURANCE.NS">ENDURANCE.NS</option>
+<option value="ENERGYDEV.NS">ENERGYDEV.NS</option>
+<option value="ENGINERSIN.NS">ENGINERSIN.NS</option>
+<option value="ENIL.NS">ENIL.NS</option>
+<option value="EPL.NS">EPL.NS</option>
+<option value="EQUITAS.NS">EQUITAS.NS</option>
+<option value="EQUITASBNK.NS">EQUITASBNK.NS</option>
+<option value="ERIS.NS">ERIS.NS</option>
+<option value="EROSMEDIA.NS">EROSMEDIA.NS</option>
+<option value="ESABINDIA.NS">ESABINDIA.NS</option>
+<option value="ESCORTS.NS">ESCORTS.NS</option>
+<option value="ESSARSHPNG.NS">ESSARSHPNG.NS</option>
+<option value="ESTER.NS">ESTER.NS</option>
+<option value="ETH-USD">ETH-USD</option>
+<option value="EUROTEXIND.NS">EUROTEXIND.NS</option>
+<option value="EVEREADY.NS">EVEREADY.NS</option>
+<option value="EVERESTIND.NS">EVERESTIND.NS</option>
+<option value="EXCEL.NS">EXCEL.NS</option>
+<option value="EXCELINDUS.NS">EXCELINDUS.NS</option>
+<option value="EXIDEIND.NS">EXIDEIND.NS</option>
+<option value="EXPLEOSOL.NS">EXPLEOSOL.NS</option>
+<option value="EXXARO.NS">EXXARO.NS</option>
+<option value="FACT.NS">FACT.NS</option>
+<option value="FAIRCHEMOR.NS">FAIRCHEMOR.NS</option>
+<option value="FCL.NS">FCL.NS</option>
+<option value="FCONSUMER.NS">FCONSUMER.NS</option>
+<option value="FCSSOFT.NS">FCSSOFT.NS</option>
+<option value="FDC.NS">FDC.NS</option>
+<option value="FEDERALBNK.NS">FEDERALBNK.NS</option>
+<option value="FEL.NS">FEL.NS</option>
+<option value="FELDVR.NS">FELDVR.NS</option>
+<option value="FIEMIND.NS">FIEMIND.NS</option>
+<option value="FILATEX.NS">FILATEX.NS</option>
+<option value="FINCABLES.NS">FINCABLES.NS</option>
+<option value="FINEORG.NS">FINEORG.NS</option>
+<option value="FINPIPE.NS">FINPIPE.NS</option>
+<option value="FLEXITUFF.NS">FLEXITUFF.NS</option>
+<option value="FLFL.NS">FLFL.NS</option>
+<option value="FLUOROCHEM.NS">FLUOROCHEM.NS</option>
+<option value="FMGOETZE.NS">FMGOETZE.NS</option>
+<option value="FMNL.NS">FMNL.NS</option>
+<option value="FORCEMOT.NS">FORCEMOT.NS</option>
+<option value="FORTIS.NS">FORTIS.NS</option>
+<option value="FOSECOIND.NS">FOSECOIND.NS</option>
+<option value="FRETAIL.NS">FRETAIL.NS</option>
+<option value="FSC.NS">FSC.NS</option>
+<option value="FSL.NS">FSL.NS</option>
+<option value="GABRIEL.NS">GABRIEL.NS</option>
+<option value="GAEL.NS">GAEL.NS</option>
+<option value="GAIL.NS">GAIL.NS</option>
+<option value="GAL.NS">GAL.NS</option>
+<option value="GALAXYSURF.NS">GALAXYSURF.NS</option>
+<option value="GALLANTT.NS">GALLANTT.NS</option>
+<option value="GALLISPAT.NS">GALLISPAT.NS</option>
+<option value="GANDHITUBE.NS">GANDHITUBE.NS</option>
+<option value="GANECOS.NS">GANECOS.NS</option>
+<option value="GANESHBE.NS">GANESHBE.NS</option>
+<option value="GANESHHOUC.NS">GANESHHOUC.NS</option>
+<option value="GANGAFORGE.NS">GANGAFORGE.NS</option>
+<option value="GANGESSECU.NS">GANGESSECU.NS</option>
+<option value="GARFIBRES.NS">GARFIBRES.NS</option>
+<option value="GATI.NS">GATI.NS</option>
+<option value="GAYAHWS.NS">GAYAHWS.NS</option>
+<option value="GAYAPROJ.NS">GAYAPROJ.NS</option>
+<option value="GDL.NS">GDL.NS</option>
+<option value="GEECEE.NS">GEECEE.NS</option>
+<option value="GEEKAYWIRE.NS">GEEKAYWIRE.NS</option>
+<option value="GENCON.NS">GENCON.NS</option>
+<option value="GENESYS.NS">GENESYS.NS</option>
+<option value="GENUSPAPER.NS">GENUSPAPER.NS</option>
+<option value="GENUSPOWER.NS">GENUSPOWER.NS</option>
+<option value="GEOJITFSL.NS">GEOJITFSL.NS</option>
+<option value="GEPIL.NS">GEPIL.NS</option>
+<option value="GESHIP.NS">GESHIP.NS</option>
+<option value="GET&amp;D.NS">GET&amp;D.NS</option>
+<option value="GFLLIMITED.NS">GFLLIMITED.NS</option>
+<option value="GFSTEELS.NS">GFSTEELS.NS</option>
+<option value="GHCL.NS">GHCL.NS</option>
+<option value="GICHSGFIN.NS">GICHSGFIN.NS</option>
+<option value="GICRE.NS">GICRE.NS</option>
+<option value="GILLANDERS.NS">GILLANDERS.NS</option>
+<option value="GILLETTE.NS">GILLETTE.NS</option>
+<option value="GINNIFILA.NS">GINNIFILA.NS</option>
+<option value="GIPCL.NS">GIPCL.NS</option>
+<option value="GKWLIMITED.NS">GKWLIMITED.NS</option>
+<option value="GLAND.NS">GLAND.NS</option>
+<option value="GLAXO.NS">GLAXO.NS</option>
+<option value="GLENMARK.NS">GLENMARK.NS</option>
+<option value="GLFL.NS">GLFL.NS</option>
+<option value="GLOBAL.NS">GLOBAL.NS</option>
+<option value="GLOBALVECT.NS">GLOBALVECT.NS</option>
+<option value="GLOBE.NS">GLOBE.NS</option>
+<option value="GLOBUSSPR.NS">GLOBUSSPR.NS</option>
+<option value="GLS.NS">GLS.NS</option>
+<option value="GMBREW.NS">GMBREW.NS</option>
+<option value="GMDCLTD.NS">GMDCLTD.NS</option>
+<option value="GMMPFAUDLR.NS">GMMPFAUDLR.NS</option>
+<option value="GMRINFRA.NS">GMRINFRA.NS</option>
+<option value="GNA.NS">GNA.NS</option>
+<option value="GNFC.NS">GNFC.NS</option>
+<option value="GOACARBON.NS">GOACARBON.NS</option>
+<option value="GOCLCORP.NS">GOCLCORP.NS</option>
+<option value="GODFRYPHLP.NS">GODFRYPHLP.NS</option>
+<option value="GODHA.NS">GODHA.NS</option>
+<option value="GODREJAGRO.NS">GODREJAGRO.NS</option>
+<option value="GODREJCP.NS">GODREJCP.NS</option>
+<option value="GODREJIND.NS">GODREJIND.NS</option>
+<option value="GODREJPROP.NS">GODREJPROP.NS</option>
+<option value="GOENKA.NS">GOENKA.NS</option>
+<option value="GOKEX.NS">GOKEX.NS</option>
+<option value="GOKUL.NS">GOKUL.NS</option>
+<option value="GOKULAGRO.NS">GOKULAGRO.NS</option>
+<option value="GOLDENTOBC.NS">GOLDENTOBC.NS</option>
+<option value="GOLDIAM.NS">GOLDIAM.NS</option>
+<option value="GOLDTECH.NS">GOLDTECH.NS</option>
+<option value="GOODLUCK.NS">GOODLUCK.NS</option>
+<option value="GOODYEAR.NS">GOODYEAR.NS</option>
+<option value="GPIL.NS">GPIL.NS</option>
+<option value="GPPL.NS">GPPL.NS</option>
+<option value="GPTINFRA.NS">GPTINFRA.NS</option>
+<option value="GRANULES.NS">GRANULES.NS</option>
+<option value="GRAPHITE.NS">GRAPHITE.NS</option>
+<option value="GRASIM.NS">GRASIM.NS</option>
+<option value="GRAUWEIL.NS">GRAUWEIL.NS</option>
+<option value="GRAVITA.NS">GRAVITA.NS</option>
+<option value="GREAVESCOT.NS">GREAVESCOT.NS</option>
+<option value="GREENLAM.NS">GREENLAM.NS</option>
+<option value="GREENPANEL.NS">GREENPANEL.NS</option>
+<option value="GREENPLY.NS">GREENPLY.NS</option>
+<option value="GREENPOWER.NS">GREENPOWER.NS</option>
+<option value="GRINDWELL.NS">GRINDWELL.NS</option>
+<option value="GRINFRA.NS">GRINFRA.NS</option>
+<option value="GROBTEA.NS">GROBTEA.NS</option>
+<option value="GRPLTD.NS">GRPLTD.NS</option>
+<option value="GRSE.NS">GRSE.NS</option>
+<option value="GSCLCEMENT.NS">GSCLCEMENT.NS</option>
+<option value="GSFC.NS">GSFC.NS</option>
+<option value="GSPL.NS">GSPL.NS</option>
+<option value="GSS.NS">GSS.NS</option>
+<option value="GTL.NS">GTL.NS</option>
+<option value="GTLINFRA.NS">GTLINFRA.NS</option>
+<option value="GTNTEX.NS">GTNTEX.NS</option>
+<option value="GTPL.NS">GTPL.NS</option>
+<option value="GUFICBIO.NS">GUFICBIO.NS</option>
+<option value="GUJALKALI.NS">GUJALKALI.NS</option>
+<option value="GUJAPOLLO.NS">GUJAPOLLO.NS</option>
+<option value="GUJGASLTD.NS">GUJGASLTD.NS</option>
+<option value="GUJRAFFIA.NS">GUJRAFFIA.NS</option>
+<option value="GULFOILLUB.NS">GULFOILLUB.NS</option>
+<option value="GULFPETRO.NS">GULFPETRO.NS</option>
+<option value="GULPOLY.NS">GULPOLY.NS</option>
+<option value="HAL.NS">HAL.NS</option>
+<option value="HAPPSTMNDS.NS">HAPPSTMNDS.NS</option>
+<option value="HARRMALAYA.NS">HARRMALAYA.NS</option>
+<option value="HATHWAY.NS">HATHWAY.NS</option>
+<option value="HATSUN.NS">HATSUN.NS</option>
+<option value="HAVELLS.NS">HAVELLS.NS</option>
+<option value="HAVISHA.NS">HAVISHA.NS</option>
+<option value="HBLPOWER.NS">HBLPOWER.NS</option>
+<option value="HBSL.NS">HBSL.NS</option>
+<option value="HCC.NS">HCC.NS</option>
+<option value="HCG.NS">HCG.NS</option>
+<option value="HCL-INSYS.NS">HCL-INSYS.NS</option>
+<option value="HCLTECH.NS">HCLTECH.NS</option>
+<option value="HDFC.NS">HDFC.NS</option>
+<option value="HDFCAMC.NS">HDFCAMC.NS</option>
+<option value="HDFCBANK.NS">HDFCBANK.NS</option>
+<option value="HDFCLIFE.NS">HDFCLIFE.NS</option>
+<option value="HDIL.NS">HDIL.NS</option>
+<option value="HEG.NS">HEG.NS</option>
+<option value="HEIDELBERG.NS">HEIDELBERG.NS</option>
+<option value="HEMIPROP.NS">HEMIPROP.NS</option>
+<option value="HERANBA.NS">HERANBA.NS</option>
+<option value="HERCULES.NS">HERCULES.NS</option>
+<option value="HERITGFOOD.NS">HERITGFOOD.NS</option>
+<option value="HEROMOTOCO.NS">HEROMOTOCO.NS</option>
+<option value="HESTERBIO.NS">HESTERBIO.NS</option>
+<option value="HEXATRADEX.NS">HEXATRADEX.NS</option>
+<option value="HFCL.NS">HFCL.NS</option>
+<option value="HGINFRA.NS">HGINFRA.NS</option>
+<option value="HGS.NS">HGS.NS</option>
+<option value="HIKAL.NS">HIKAL.NS</option>
+<option value="HIL.NS">HIL.NS</option>
+<option value="HILTON.NS">HILTON.NS</option>
+<option value="HIMATSEIDE.NS">HIMATSEIDE.NS</option>
+<option value="HINDALCO.NS">HINDALCO.NS</option>
+<option value="HINDCOMPOS.NS">HINDCOMPOS.NS</option>
+<option value="HINDCON.NS">HINDCON.NS</option>
+<option value="HINDCOPPER.NS">HINDCOPPER.NS</option>
+<option value="HINDMOTORS.NS">HINDMOTORS.NS</option>
+<option value="HINDNATGLS.NS">HINDNATGLS.NS</option>
+<option value="HINDOILEXP.NS">HINDOILEXP.NS</option>
+<option value="HINDPETRO.NS">HINDPETRO.NS</option>
+<option value="HINDUNILVR.NS">HINDUNILVR.NS</option>
+<option value="HINDZINC.NS">HINDZINC.NS</option>
+<option value="HIRECT.NS">HIRECT.NS</option>
+<option value="HISARMETAL.NS">HISARMETAL.NS</option>
+<option value="HITECH.NS">HITECH.NS</option>
+<option value="HITECHCORP.NS">HITECHCORP.NS</option>
+<option value="HITECHGEAR.NS">HITECHGEAR.NS</option>
+<option value="HLEGLAS.NS">HLEGLAS.NS</option>
+<option value="HLVLTD.NS">HLVLTD.NS</option>
+<option value="HMT.NS">HMT.NS</option>
+<option value="HMVL.NS">HMVL.NS</option>
+<option value="HNDFDS.NS">HNDFDS.NS</option>
+<option value="HOMEFIRST.NS">HOMEFIRST.NS</option>
+<option value="HONAUT.NS">HONAUT.NS</option>
+<option value="HONDAPOWER.NS">HONDAPOWER.NS</option>
+<option value="HOTELRUGBY.NS">HOTELRUGBY.NS</option>
+<option value="HOVS.NS">HOVS.NS</option>
+<option value="HPL.NS">HPL.NS</option>
+<option value="HSCL.NS">HSCL.NS</option>
+<option value="HSIL.NS">HSIL.NS</option>
+<option value="HTMEDIA.NS">HTMEDIA.NS</option>
+<option value="HUBTOWN.NS">HUBTOWN.NS</option>
+<option value="HUDCO.NS">HUDCO.NS</option>
+<option value="HUHTAMAKI.NS">HUHTAMAKI.NS</option>
+<option value="IBREALEST.NS">IBREALEST.NS</option>
+<option value="IBULHSGFIN.NS">IBULHSGFIN.NS</option>
+<option value="ICDSLTD.NS">ICDSLTD.NS</option>
+<option value="ICEMAKE.NS">ICEMAKE.NS</option>
+<option value="ICICIBANK.NS">ICICIBANK.NS</option>
+<option value="ICICIGI.NS">ICICIGI.NS</option>
+<option value="ICICIPRULI.NS">ICICIPRULI.NS</option>
+<option value="ICIL.NS">ICIL.NS</option>
+<option value="ICRA.NS">ICRA.NS</option>
+<option value="IDBI.NS">IDBI.NS</option>
+<option value="IDEA.NS">IDEA.NS</option>
+<option value="IDFC.NS">IDFC.NS</option>
+<option value="IDFCFIRSTB.NS">IDFCFIRSTB.NS</option>
+<option value="IEX.NS">IEX.NS</option>
+<option value="IFBAGRO.NS">IFBAGRO.NS</option>
+<option value="IFBIND.NS">IFBIND.NS</option>
+<option value="IFCI.NS">IFCI.NS</option>
+<option value="IFGLEXPOR.NS">IFGLEXPOR.NS</option>
+<option value="IGARASHI.NS">IGARASHI.NS</option>
+<option value="IGL.NS">IGL.NS</option>
+<option value="IGPL.NS">IGPL.NS</option>
+<option value="IIFL.NS">IIFL.NS</option>
+<option value="IIFLSEC.NS">IIFLSEC.NS</option>
+<option value="IIFLWAM.NS">IIFLWAM.NS</option>
+<option value="IITL.NS">IITL.NS</option>
+<option value="IL&amp;FSENGG.NS">IL&amp;FSENGG.NS</option>
+<option value="IL&amp;FSTRANS.NS">IL&amp;FSTRANS.NS</option>
+<option value="IMAGICAA.NS">IMAGICAA.NS</option>
+<option value="IMFA.NS">IMFA.NS</option>
+<option value="IMPAL.NS">IMPAL.NS</option>
+<option value="INCREDIBLE.NS">INCREDIBLE.NS</option>
+<option value="INDBANK.NS">INDBANK.NS</option>
+<option value="INDHOTEL.NS">INDHOTEL.NS</option>
+<option value="INDIACEM.NS">INDIACEM.NS</option>
+<option value="INDIAGLYCO.NS">INDIAGLYCO.NS</option>
+<option value="INDIAMART.NS">INDIAMART.NS</option>
+<option value="INDIANB.NS">INDIANB.NS</option>
+<option value="INDIANCARD.NS">INDIANCARD.NS</option>
+<option value="INDIANHUME.NS">INDIANHUME.NS</option>
+<option value="INDIGO.NS">INDIGO.NS</option>
+<option value="INDIGOPNTS.NS">INDIGOPNTS.NS</option>
+<option value="INDLMETER.NS">INDLMETER.NS</option>
+<option value="INDNIPPON.NS">INDNIPPON.NS</option>
+<option value="INDOCO.NS">INDOCO.NS</option>
+<option value="INDORAMA.NS">INDORAMA.NS</option>
+<option value="INDOSOLAR.NS">INDOSOLAR.NS</option>
+<option value="INDOSTAR.NS">INDOSTAR.NS</option>
+<option value="INDOTECH.NS">INDOTECH.NS</option>
+<option value="INDOTHAI.NS">INDOTHAI.NS</option>
+<option value="INDOWIND.NS">INDOWIND.NS</option>
+<option value="INDRAMEDCO.NS">INDRAMEDCO.NS</option>
+<option value="INDSWFTLAB.NS">INDSWFTLAB.NS</option>
+<option value="INDSWFTLTD.NS">INDSWFTLTD.NS</option>
+<option value="INDTERRAIN.NS">INDTERRAIN.NS</option>
+<option value="INDUSINDBK.NS">INDUSINDBK.NS</option>
+<option value="INDUSTOWER.NS">INDUSTOWER.NS</option>
+<option value="INEOSSTYRO.NS">INEOSSTYRO.NS</option>
+<option value="INFIBEAM.NS">INFIBEAM.NS</option>
+<option value="INFOBEAN.NS">INFOBEAN.NS</option>
+<option value="INFOMEDIA.NS">INFOMEDIA.NS</option>
+<option value="INFY.NS">INFY.NS</option>
+<option value="INGERRAND.NS">INGERRAND.NS</option>
+<option value="INOXLEISUR.NS">INOXLEISUR.NS</option>
+<option value="INOXWIND.NS">INOXWIND.NS</option>
+<option value="INSECTICID.NS">INSECTICID.NS</option>
+<option value="INSPIRISYS.NS">INSPIRISYS.NS</option>
+<option value="INTELLECT.NS">INTELLECT.NS</option>
+<option value="INTENTECH.NS">INTENTECH.NS</option>
+<option value="INTLCONV.NS">INTLCONV.NS</option>
+<option value="INVENTURE.NS">INVENTURE.NS</option>
+<option value="IOB.NS">IOB.NS</option>
+<option value="IOC.NS">IOC.NS</option>
+<option value="IOLCP.NS">IOLCP.NS</option>
+<option value="IPCALAB.NS">IPCALAB.NS</option>
+<option value="IPL.NS">IPL.NS</option>
+<option value="IRB.NS">IRB.NS</option>
+<option value="IRCON.NS">IRCON.NS</option>
+<option value="IRCTC.NS">IRCTC.NS</option>
+<option value="IRFC.NS">IRFC.NS</option>
+<option value="IRISDOREME.NS">IRISDOREME.NS</option>
+<option value="ISEC.NS">ISEC.NS</option>
+<option value="ISFT.NS">ISFT.NS</option>
+<option value="ISGEC.NS">ISGEC.NS</option>
+<option value="ISMTLTD.NS">ISMTLTD.NS</option>
+<option value="ITC.NS">ITC.NS</option>
+<option value="ITDC.NS">ITDC.NS</option>
+<option value="ITDCEM.NS">ITDCEM.NS</option>
+<option value="ITI.NS">ITI.NS</option>
+<option value="IVC.NS">IVC.NS</option>
+<option value="IVP.NS">IVP.NS</option>
+<option value="IWEL.NS">IWEL.NS</option>
+<option value="IZMO.NS">IZMO.NS</option>
+<option value="J&amp;KBANK.NS">J&amp;KBANK.NS</option>
+<option value="JAGRAN.NS">JAGRAN.NS</option>
+<option value="JAGSNPHARM.NS">JAGSNPHARM.NS</option>
+<option value="JAIBALAJI.NS">JAIBALAJI.NS</option>
+<option value="JAICORPLTD.NS">JAICORPLTD.NS</option>
+<option value="JAINSTUDIO.NS">JAINSTUDIO.NS</option>
+<option value="JAIPURKURT.NS">JAIPURKURT.NS</option>
+<option value="JAMNAAUTO.NS">JAMNAAUTO.NS</option>
+<option value="JASH.NS">JASH.NS</option>
+<option value="JAYAGROGN.NS">JAYAGROGN.NS</option>
+<option value="JAYBARMARU.NS">JAYBARMARU.NS</option>
+<option value="JAYNECOIND.NS">JAYNECOIND.NS</option>
+<option value="JAYSREETEA.NS">JAYSREETEA.NS</option>
+<option value="JBCHEPHARM.NS">JBCHEPHARM.NS</option>
+<option value="JBFIND.NS">JBFIND.NS</option>
+<option value="JBMA.NS">JBMA.NS</option>
+<option value="JCHAC.NS">JCHAC.NS</option>
+<option value="JETAIRWAYS.NS">JETAIRWAYS.NS</option>
+<option value="JHS.NS">JHS.NS</option>
+<option value="JIKIND.NS">JIKIND.NS</option>
+<option value="JINDALPHOT.NS">JINDALPHOT.NS</option>
+<option value="JINDALPOLY.NS">JINDALPOLY.NS</option>
+<option value="JINDALSAW.NS">JINDALSAW.NS</option>
+<option value="JINDALSTEL.NS">JINDALSTEL.NS</option>
+<option value="JINDRILL.NS">JINDRILL.NS</option>
+<option value="JINDWORLD.NS">JINDWORLD.NS</option>
+<option value="JISLDVREQS.NS">JISLDVREQS.NS</option>
+<option value="JISLJALEQS.NS">JISLJALEQS.NS</option>
+<option value="JITFINFRA.NS">JITFINFRA.NS</option>
+<option value="JKCEMENT.NS">JKCEMENT.NS</option>
+<option value="JKIL.NS">JKIL.NS</option>
+<option value="JKLAKSHMI.NS">JKLAKSHMI.NS</option>
+<option value="JKPAPER.NS">JKPAPER.NS</option>
+<option value="JKTYRE.NS">JKTYRE.NS</option>
+<option value="JMA.NS">JMA.NS</option>
+<option value="JMCPROJECT.NS">JMCPROJECT.NS</option>
+<option value="JMFINANCIL.NS">JMFINANCIL.NS</option>
+<option value="JMTAUTOLTD.NS">JMTAUTOLTD.NS</option>
+<option value="JOCIL.NS">JOCIL.NS</option>
+<option value="JPASSOCIAT.NS">JPASSOCIAT.NS</option>
+<option value="JPINFRATEC.NS">JPINFRATEC.NS</option>
+<option value="JPOLYINVST.NS">JPOLYINVST.NS</option>
+<option value="JPPOWER.NS">JPPOWER.NS</option>
+<option value="JSL.NS">JSL.NS</option>
+<option value="JSLHISAR.NS">JSLHISAR.NS</option>
+<option value="JSWENERGY.NS">JSWENERGY.NS</option>
+<option value="JSWHL.NS">JSWHL.NS</option>
+<option value="JSWISPL.NS">JSWISPL.NS</option>
+<option value="JSWSTEEL.NS">JSWSTEEL.NS</option>
+<option value="JTEKTINDIA.NS">JTEKTINDIA.NS</option>
+<option value="JUBLFOOD.NS">JUBLFOOD.NS</option>
+<option value="JUBLINDS.NS">JUBLINDS.NS</option>
+<option value="JUBLINGREA.NS">JUBLINGREA.NS</option>
+<option value="JUBLPHARMA.NS">JUBLPHARMA.NS</option>
+<option value="JUMPNET.NS">JUMPNET.NS</option>
+<option value="JUSTDIAL.NS">JUSTDIAL.NS</option>
+<option value="JYOTHYLAB.NS">JYOTHYLAB.NS</option>
+<option value="JYOTISTRUC.NS">JYOTISTRUC.NS</option>
+<option value="KABRAEXTRU.NS">KABRAEXTRU.NS</option>
+<option value="KAJARIACER.NS">KAJARIACER.NS</option>
+<option value="KAKATCEM.NS">KAKATCEM.NS</option>
+<option value="KALPATPOWR.NS">KALPATPOWR.NS</option>
+<option value="KALYANI.NS">KALYANI.NS</option>
+<option value="KALYANIFRG.NS">KALYANIFRG.NS</option>
+<option value="KALYANKJIL.NS">KALYANKJIL.NS</option>
+<option value="KAMATHOTEL.NS">KAMATHOTEL.NS</option>
+<option value="KAMDHENU.NS">KAMDHENU.NS</option>
+<option value="KANANIIND.NS">KANANIIND.NS</option>
+<option value="KANORICHEM.NS">KANORICHEM.NS</option>
+<option value="KANPRPLA.NS">KANPRPLA.NS</option>
+<option value="KANSAINER.NS">KANSAINER.NS</option>
+<option value="KAPSTON.NS">KAPSTON.NS</option>
+<option value="KARDA.NS">KARDA.NS</option>
+<option value="KARMAENG.NS">KARMAENG.NS</option>
+<option value="KARURVYSYA.NS">KARURVYSYA.NS</option>
+<option value="KAUSHALYA.NS">KAUSHALYA.NS</option>
+<option value="KAVVERITEL.NS">KAVVERITEL.NS</option>
+<option value="KAYA.NS">KAYA.NS</option>
+<option value="KCP.NS">KCP.NS</option>
+<option value="KCPSUGIND.NS">KCPSUGIND.NS</option>
+<option value="KDDL.NS">KDDL.NS</option>
+<option value="KEC.NS">KEC.NS</option>
+<option value="KECL.NS">KECL.NS</option>
+<option value="KEERTI.NS">KEERTI.NS</option>
+<option value="KEI.NS">KEI.NS</option>
+<option value="KELLTONTEC.NS">KELLTONTEC.NS</option>
+<option value="KENNAMET.NS">KENNAMET.NS</option>
+<option value="KERNEX.NS">KERNEX.NS</option>
+<option value="KESORAMIND.NS">KESORAMIND.NS</option>
+<option value="KEYFINSERV.NS">KEYFINSERV.NS</option>
+<option value="KHADIM.NS">KHADIM.NS</option>
+<option value="KHAICHEM.NS">KHAICHEM.NS</option>
+<option value="KHAITANLTD.NS">KHAITANLTD.NS</option>
+<option value="KHANDSE.NS">KHANDSE.NS</option>
+<option value="KICL.NS">KICL.NS</option>
+<option value="KILITCH.NS">KILITCH.NS</option>
+<option value="KIMS.NS">KIMS.NS</option>
+<option value="KINGFA.NS">KINGFA.NS</option>
+<option value="KIOCL.NS">KIOCL.NS</option>
+<option value="KIRIINDUS.NS">KIRIINDUS.NS</option>
+<option value="KIRLFER.NS">KIRLFER.NS</option>
+<option value="KIRLOSBROS.NS">KIRLOSBROS.NS</option>
+<option value="KIRLOSENG.NS">KIRLOSENG.NS</option>
+<option value="KIRLOSIND.NS">KIRLOSIND.NS</option>
+<option value="KITEX.NS">KITEX.NS</option>
+<option value="KKCL.NS">KKCL.NS</option>
+<option value="KMSUGAR.NS">KMSUGAR.NS</option>
+<option value="KNRCON.NS">KNRCON.NS</option>
+<option value="KOKUYOCMLN.NS">KOKUYOCMLN.NS</option>
+<option value="KOLTEPATIL.NS">KOLTEPATIL.NS</option>
+<option value="KOPRAN.NS">KOPRAN.NS</option>
+<option value="KOTAKBANK.NS">KOTAKBANK.NS</option>
+<option value="KOTARISUG.NS">KOTARISUG.NS</option>
+<option value="KOTHARIPET.NS">KOTHARIPET.NS</option>
+<option value="KOTHARIPRO.NS">KOTHARIPRO.NS</option>
+<option value="KOVAI.NS">KOVAI.NS</option>
+<option value="KPIGLOBAL.NS">KPIGLOBAL.NS</option>
+<option value="KPITTECH.NS">KPITTECH.NS</option>
+<option value="KPRMILL.NS">KPRMILL.NS</option>
+<option value="KRBL.NS">KRBL.NS</option>
+<option value="KREBSBIO.NS">KREBSBIO.NS</option>
+<option value="KRIDHANINF.NS">KRIDHANINF.NS</option>
+<option value="KRISHANA.NS">KRISHANA.NS</option>
+<option value="KRSNAA.NS">KRSNAA.NS</option>
+<option value="KSB.NS">KSB.NS</option>
+<option value="KSCL.NS">KSCL.NS</option>
+<option value="KSL.NS">KSL.NS</option>
+<option value="KTKBANK.NS">KTKBANK.NS</option>
+<option value="KUANTUM.NS">KUANTUM.NS</option>
+<option value="L&amp;TFH.NS">L&amp;TFH.NS</option>
+<option value="LAGNAM.NS">LAGNAM.NS</option>
+<option value="LAKPRE.NS">LAKPRE.NS</option>
+<option value="LALPATHLAB.NS">LALPATHLAB.NS</option>
+<option value="LAMBODHARA.NS">LAMBODHARA.NS</option>
+<option value="LAOPALA.NS">LAOPALA.NS</option>
+<option value="LASA.NS">LASA.NS</option>
+<option value="LAURUSLABS.NS">LAURUSLABS.NS</option>
+<option value="LAXMIMACH.NS">LAXMIMACH.NS</option>
+<option value="LCCINFOTEC.NS">LCCINFOTEC.NS</option>
+<option value="LEMONTREE.NS">LEMONTREE.NS</option>
+<option value="LFIC.NS">LFIC.NS</option>
+<option value="LGBBROSLTD.NS">LGBBROSLTD.NS</option>
+<option value="LGBFORGE.NS">LGBFORGE.NS</option>
+<option value="LIBAS.NS">LIBAS.NS</option>
+<option value="LIBERTSHOE.NS">LIBERTSHOE.NS</option>
+<option value="LICHSGFIN.NS">LICHSGFIN.NS</option>
+<option value="LIKHITHA.NS">LIKHITHA.NS</option>
+<option value="LINCOLN.NS">LINCOLN.NS</option>
+<option value="LINCPEN.NS">LINCPEN.NS</option>
+<option value="LINDEINDIA.NS">LINDEINDIA.NS</option>
+<option value="LODHA.NS">LODHA.NS</option>
+<option value="LOKESHMACH.NS">LOKESHMACH.NS</option>
+<option value="LOTUSEYE.NS">LOTUSEYE.NS</option>
+<option value="LOVABLE.NS">LOVABLE.NS</option>
+<option value="LPDC.NS">LPDC.NS</option>
+<option value="LSIL.NS">LSIL.NS</option>
+<option value="LT.NS">LT.NS</option>
+<option value="LTI.NS">LTI.NS</option>
+<option value="LTTS.NS">LTTS.NS</option>
+<option value="LUMAXIND.NS">LUMAXIND.NS</option>
+<option value="LUMAXTECH.NS">LUMAXTECH.NS</option>
+<option value="LUPIN.NS">LUPIN.NS</option>
+<option value="LUXIND.NS">LUXIND.NS</option>
+<option value="LXCHEM.NS">LXCHEM.NS</option>
+<option value="LYKALABS.NS">LYKALABS.NS</option>
+<option value="LYPSAGEMS.NS">LYPSAGEMS.NS</option>
+<option value="M&amp;M.NS">M&amp;M.NS</option>
+<option value="M&amp;MFIN.NS">M&amp;MFIN.NS</option>
+<option value="MAANALU.NS">MAANALU.NS</option>
+<option value="MACPOWER.NS">MACPOWER.NS</option>
+<option value="MADHAV.NS">MADHAV.NS</option>
+<option value="MADHUCON.NS">MADHUCON.NS</option>
+<option value="MADRASFERT.NS">MADRASFERT.NS</option>
+<option value="MAGADSUGAR.NS">MAGADSUGAR.NS</option>
+<option value="MAGNUM.NS">MAGNUM.NS</option>
+<option value="MAHABANK.NS">MAHABANK.NS</option>
+<option value="MAHAPEXLTD.NS">MAHAPEXLTD.NS</option>
+<option value="MAHASTEEL.NS">MAHASTEEL.NS</option>
+<option value="MAHEPC.NS">MAHEPC.NS</option>
+<option value="MAHESHWARI.NS">MAHESHWARI.NS</option>
+<option value="MAHINDCIE.NS">MAHINDCIE.NS</option>
+<option value="MAHLIFE.NS">MAHLIFE.NS</option>
+<option value="MAHLOG.NS">MAHLOG.NS</option>
+<option value="MAHSCOOTER.NS">MAHSCOOTER.NS</option>
+<option value="MAHSEAMLES.NS">MAHSEAMLES.NS</option>
+<option value="MAITHANALL.NS">MAITHANALL.NS</option>
+<option value="MAJESCO.NS">MAJESCO.NS</option>
+<option value="MALUPAPER.NS">MALUPAPER.NS</option>
+<option value="MANAKALUCO.NS">MANAKALUCO.NS</option>
+<option value="MANAKCOAT.NS">MANAKCOAT.NS</option>
+<option value="MANAKSIA.NS">MANAKSIA.NS</option>
+<option value="MANAKSTEEL.NS">MANAKSTEEL.NS</option>
+<option value="MANALIPETC.NS">MANALIPETC.NS</option>
+<option value="MANAPPURAM.NS">MANAPPURAM.NS</option>
+<option value="MANGALAM.NS">MANGALAM.NS</option>
+<option value="MANGCHEFER.NS">MANGCHEFER.NS</option>
+<option value="MANGLMCEM.NS">MANGLMCEM.NS</option>
+<option value="MANGTIMBER.NS">MANGTIMBER.NS</option>
+<option value="MANINDS.NS">MANINDS.NS</option>
+<option value="MANINFRA.NS">MANINFRA.NS</option>
+<option value="MANUGRAPH.NS">MANUGRAPH.NS</option>
+<option value="MARALOVER.NS">MARALOVER.NS</option>
+<option value="MARATHON.NS">MARATHON.NS</option>
+<option value="MARICO.NS">MARICO.NS</option>
+<option value="MARINE.NS">MARINE.NS</option>
+<option value="MARKSANS.NS">MARKSANS.NS</option>
+<option value="MARUTI.NS">MARUTI.NS</option>
+<option value="MASFIN.NS">MASFIN.NS</option>
+<option value="MASKINVEST.NS">MASKINVEST.NS</option>
+<option value="MASTEK.NS">MASTEK.NS</option>
+<option value="MATRIMONY.NS">MATRIMONY.NS</option>
+<option value="MAWANASUG.NS">MAWANASUG.NS</option>
+<option value="MAXHEALTH.NS">MAXHEALTH.NS</option>
+<option value="MAXIND.NS">MAXIND.NS</option>
+<option value="MAXVIL.NS">MAXVIL.NS</option>
+<option value="MAYURUNIQ.NS">MAYURUNIQ.NS</option>
+<option value="MAZDA.NS">MAZDA.NS</option>
+<option value="MAZDOCK.NS">MAZDOCK.NS</option>
+<option value="MBAPL.NS">MBAPL.NS</option>
+<option value="MBECL.NS">MBECL.NS</option>
+<option value="MBLINFRA.NS">MBLINFRA.NS</option>
+<option value="MCDHOLDING.NS">MCDHOLDING.NS</option>
+<option value="MCDOWELL-N.NS">MCDOWELL-N.NS</option>
+<option value="MCL.NS">MCL.NS</option>
+<option value="MCLEODRUSS.NS">MCLEODRUSS.NS</option>
+<option value="MCX.NS">MCX.NS</option>
+<option value="MEGASOFT.NS">MEGASOFT.NS</option>
+<option value="MELSTAR.NS">MELSTAR.NS</option>
+<option value="MENONBE.NS">MENONBE.NS</option>
+<option value="MEP.NS">MEP.NS</option>
+<option value="MERCATOR.NS">MERCATOR.NS</option>
+<option value="METALFORGE.NS">METALFORGE.NS</option>
+<option value="METROPOLIS.NS">METROPOLIS.NS</option>
+<option value="MFL.NS">MFL.NS</option>
+<option value="MFSL.NS">MFSL.NS</option>
+<option value="MGEL.NS">MGEL.NS</option>
+<option value="MGL.NS">MGL.NS</option>
+<option value="MHRIL.NS">MHRIL.NS</option>
+<option value="MIDHANI.NS">MIDHANI.NS</option>
+<option value="MINDACORP.NS">MINDACORP.NS</option>
+<option value="MINDAIND.NS">MINDAIND.NS</option>
+<option value="MINDTECK.NS">MINDTECK.NS</option>
+<option value="MINDTREE.NS">MINDTREE.NS</option>
+<option value="MIRCELECTR.NS">MIRCELECTR.NS</option>
+<option value="MIRZAINT.NS">MIRZAINT.NS</option>
+<option value="MITTAL.NS">MITTAL.NS</option>
+<option value="MMFL.NS">MMFL.NS</option>
+<option value="MMP.NS">MMP.NS</option>
+<option value="MMTC.NS">MMTC.NS</option>
+<option value="MODIRUBBER.NS">MODIRUBBER.NS</option>
+<option value="MODISNME.NS">MODISNME.NS</option>
+<option value="MOHITIND.NS">MOHITIND.NS</option>
+<option value="MOHOTAIND.NS">MOHOTAIND.NS</option>
+<option value="MOIL.NS">MOIL.NS</option>
+<option value="MOKSH.NS">MOKSH.NS</option>
+<option value="MOL.NS">MOL.NS</option>
+<option value="MOLDTECH.NS">MOLDTECH.NS</option>
+<option value="MOLDTKPAC.NS">MOLDTKPAC.NS</option>
+<option value="MONTECARLO.NS">MONTECARLO.NS</option>
+<option value="MORARJEE.NS">MORARJEE.NS</option>
+<option value="MOREPENLAB.NS">MOREPENLAB.NS</option>
+<option value="MOTHERSUMI.NS">MOTHERSUMI.NS</option>
+<option value="MOTILALOFS.NS">MOTILALOFS.NS</option>
+<option value="MOTOGENFIN.NS">MOTOGENFIN.NS</option>
+<option value="MPHASIS.NS">MPHASIS.NS</option>
+<option value="MPSLTD.NS">MPSLTD.NS</option>
+<option value="MRF.NS">MRF.NS</option>
+<option value="MRO-TEK.NS">MRO-TEK.NS</option>
+<option value="MRPL.NS">MRPL.NS</option>
+<option value="MSPL.NS">MSPL.NS</option>
+<option value="MSTCLTD.NS">MSTCLTD.NS</option>
+<option value="MTARTECH.NS">MTARTECH.NS</option>
+<option value="MTEDUCARE.NS">MTEDUCARE.NS</option>
+<option value="MTNL.NS">MTNL.NS</option>
+<option value="MUKANDLTD.NS">MUKANDLTD.NS</option>
+<option value="MUKTAARTS.NS">MUKTAARTS.NS</option>
+<option value="MUNJALAU.NS">MUNJALAU.NS</option>
+<option value="MUNJALSHOW.NS">MUNJALSHOW.NS</option>
+<option value="MURUDCERA.NS">MURUDCERA.NS</option>
+<option value="MUTHOOTCAP.NS">MUTHOOTCAP.NS</option>
+<option value="MUTHOOTFIN.NS">MUTHOOTFIN.NS</option>
+<option value="NACLIND.NS">NACLIND.NS</option>
+<option value="NAGAFERT.NS">NAGAFERT.NS</option>
+<option value="NAGREEKCAP.NS">NAGREEKCAP.NS</option>
+<option value="NAGREEKEXP.NS">NAGREEKEXP.NS</option>
+<option value="NAHARCAP.NS">NAHARCAP.NS</option>
+<option value="NAHARINDUS.NS">NAHARINDUS.NS</option>
+<option value="NAHARPOLY.NS">NAHARPOLY.NS</option>
+<option value="NAHARSPING.NS">NAHARSPING.NS</option>
+<option value="NAM-INDIA.NS">NAM-INDIA.NS</option>
+<option value="NATCOPHARM.NS">NATCOPHARM.NS</option>
+<option value="NATHBIOGEN.NS">NATHBIOGEN.NS</option>
+<option value="NATIONALUM.NS">NATIONALUM.NS</option>
+<option value="NATNLSTEEL.NS">NATNLSTEEL.NS</option>
+<option value="NAUKRI.NS">NAUKRI.NS</option>
+<option value="NAVINFLUOR.NS">NAVINFLUOR.NS</option>
+<option value="NAVKARCORP.NS">NAVKARCORP.NS</option>
+<option value="NAVNETEDUL.NS">NAVNETEDUL.NS</option>
+<option value="NAZARA.NS">NAZARA.NS</option>
+<option value="NBCC.NS">NBCC.NS</option>
+<option value="NBIFIN.NS">NBIFIN.NS</option>
+<option value="NBVENTURES.NS">NBVENTURES.NS</option>
+<option value="NCC.NS">NCC.NS</option>
+<option value="NCLIND.NS">NCLIND.NS</option>
+<option value="NDGL.NS">NDGL.NS</option>
+<option value="NDL.NS">NDL.NS</option>
+<option value="NDRAUTO.NS">NDRAUTO.NS</option>
+<option value="NDTV.NS">NDTV.NS</option>
+<option value="NECCLTD.NS">NECCLTD.NS</option>
+<option value="NECLIFE.NS">NECLIFE.NS</option>
+<option value="NELCAST.NS">NELCAST.NS</option>
+<option value="NELCO.NS">NELCO.NS</option>
+<option value="NEOGEN.NS">NEOGEN.NS</option>
+<option value="NESCO.NS">NESCO.NS</option>
+<option value="NESTLEIND.NS">NESTLEIND.NS</option>
+<option value="NETWORK18.NS">NETWORK18.NS</option>
+<option value="NEULANDLAB.NS">NEULANDLAB.NS</option>
+<option value="NEWGEN.NS">NEWGEN.NS</option>
+<option value="NEXTMEDIA.NS">NEXTMEDIA.NS</option>
+<option value="NFL.NS">NFL.NS</option>
+<option value="NGIL.NS">NGIL.NS</option>
+<option value="NH.NS">NH.NS</option>
+<option value="NHPC.NS">NHPC.NS</option>
+<option value="NIACL.NS">NIACL.NS</option>
+<option value="NIBL.NS">NIBL.NS</option>
+<option value="NIITLTD.NS">NIITLTD.NS</option>
+<option value="NILAINFRA.NS">NILAINFRA.NS</option>
+<option value="NILASPACES.NS">NILASPACES.NS</option>
+<option value="NILKAMAL.NS">NILKAMAL.NS</option>
+<option value="NIPPOBATRY.NS">NIPPOBATRY.NS</option>
+<option value="NIRAJ.NS">NIRAJ.NS</option>
+<option value="NIRAJISPAT.NS">NIRAJISPAT.NS</option>
+<option value="NITCO.NS">NITCO.NS</option>
+<option value="NITINFIRE.NS">NITINFIRE.NS</option>
+<option value="NITINSPIN.NS">NITINSPIN.NS</option>
+<option value="NITIRAJ.NS">NITIRAJ.NS</option>
+<option value="NKIND.NS">NKIND.NS</option>
+<option value="NLCINDIA.NS">NLCINDIA.NS</option>
+<option value="NMDC.NS">NMDC.NS</option>
+<option value="NOCIL.NS">NOCIL.NS</option>
+<option value="NOIDATOLL.NS">NOIDATOLL.NS</option>
+<option value="NORBTEAEXP.NS">NORBTEAEXP.NS</option>
+<option value="NOVARTIND.NS">NOVARTIND.NS</option>
+<option value="NRAIL.NS">NRAIL.NS</option>
+<option value="NRBBEARING.NS">NRBBEARING.NS</option>
+<option value="NSIL.NS">NSIL.NS</option>
+<option value="NTL.NS">NTL.NS</option>
+<option value="NTPC.NS">NTPC.NS</option>
+<option value="NUCLEUS.NS">NUCLEUS.NS</option>
+<option value="NURECA.NS">NURECA.NS</option>
+<option value="NUVOCO.NS">NUVOCO.NS</option>
+<option value="NXTDIGITAL.NS">NXTDIGITAL.NS</option>
+<option value="OAL.NS">OAL.NS</option>
+<option value="OBEROIRLTY.NS">OBEROIRLTY.NS</option>
+<option value="OCCL.NS">OCCL.NS</option>
+<option value="OFSS.NS">OFSS.NS</option>
+<option value="OIL.NS">OIL.NS</option>
+<option value="OILCOUNTUB.NS">OILCOUNTUB.NS</option>
+<option value="OLECTRA.NS">OLECTRA.NS</option>
+<option value="OMAXAUTO.NS">OMAXAUTO.NS</option>
+<option value="OMAXE.NS">OMAXE.NS</option>
+<option value="OMINFRAL.NS">OMINFRAL.NS</option>
+<option value="OMKARCHEM.NS">OMKARCHEM.NS</option>
+<option value="ONELIFECAP.NS">ONELIFECAP.NS</option>
+<option value="ONEPOINT.NS">ONEPOINT.NS</option>
+<option value="ONGC.NS">ONGC.NS</option>
+<option value="ONMOBILE.NS">ONMOBILE.NS</option>
+<option value="ONWARDTEC.NS">ONWARDTEC.NS</option>
+<option value="OPTIEMUS.NS">OPTIEMUS.NS</option>
+<option value="OPTOCIRCUI.NS">OPTOCIRCUI.NS</option>
+<option value="ORBTEXP.NS">ORBTEXP.NS</option>
+<option value="ORCHPHARMA.NS">ORCHPHARMA.NS</option>
+<option value="ORICONENT.NS">ORICONENT.NS</option>
+<option value="ORIENTABRA.NS">ORIENTABRA.NS</option>
+<option value="ORIENTALTL.NS">ORIENTALTL.NS</option>
+<option value="ORIENTBELL.NS">ORIENTBELL.NS</option>
+<option value="ORIENTCEM.NS">ORIENTCEM.NS</option>
+<option value="ORIENTELEC.NS">ORIENTELEC.NS</option>
+<option value="ORIENTHOT.NS">ORIENTHOT.NS</option>
+<option value="ORIENTLTD.NS">ORIENTLTD.NS</option>
+<option value="ORIENTPPR.NS">ORIENTPPR.NS</option>
+<option value="ORISSAMINE.NS">ORISSAMINE.NS</option>
+<option value="ORTEL.NS">ORTEL.NS</option>
+<option value="ORTINLAB.NS">ORTINLAB.NS</option>
+<option value="OSWALAGRO.NS">OSWALAGRO.NS</option>
+<option value="PAEL.NS">PAEL.NS</option>
+<option value="PAGEIND.NS">PAGEIND.NS</option>
+<option value="PAISALO.NS">PAISALO.NS</option>
+<option value="PALASHSECU.NS">PALASHSECU.NS</option>
+<option value="PALREDTEC.NS">PALREDTEC.NS</option>
+<option value="PANACEABIO.NS">PANACEABIO.NS</option>
+<option value="PANACHE.NS">PANACHE.NS</option>
+<option value="PANAMAPET.NS">PANAMAPET.NS</option>
+<option value="PANSARI.NS">PANSARI.NS</option>
+<option value="PAR.NS">PAR.NS</option>
+<option value="PARACABLES.NS">PARACABLES.NS</option>
+<option value="PARAGMILK.NS">PARAGMILK.NS</option>
+<option value="PARAS.NS">PARAS.NS</option>
+<option value="PARSVNATH.NS">PARSVNATH.NS</option>
+<option value="PASUPTAC.NS">PASUPTAC.NS</option>
+<option value="PATELENG.NS">PATELENG.NS</option>
+<option value="PATINTLOG.NS">PATINTLOG.NS</option>
+<option value="PATSPINLTD.NS">PATSPINLTD.NS</option>
+<option value="PBAINFRA.NS">PBAINFRA.NS</option>
+<option value="PCJEWELLER.NS">PCJEWELLER.NS</option>
+<option value="PDMJEPAPER.NS">PDMJEPAPER.NS</option>
+<option value="PDPL.NS">PDPL.NS</option>
+<option value="PDSMFL.NS">PDSMFL.NS</option>
+<option value="PEARLPOLY.NS">PEARLPOLY.NS</option>
+<option value="PEL.NS">PEL.NS</option>
+<option value="PENIND.NS">PENIND.NS</option>
+<option value="PENINLAND.NS">PENINLAND.NS</option>
+<option value="PERSISTENT.NS">PERSISTENT.NS</option>
+<option value="PETRONET.NS">PETRONET.NS</option>
+<option value="PFC.NS">PFC.NS</option>
+<option value="PFIZER.NS">PFIZER.NS</option>
+<option value="PFOCUS.NS">PFOCUS.NS</option>
+<option value="PFS.NS">PFS.NS</option>
+<option value="PGEL.NS">PGEL.NS</option>
+<option value="PGHH.NS">PGHH.NS</option>
+<option value="PGHL.NS">PGHL.NS</option>
+<option value="PGIL.NS">PGIL.NS</option>
+<option value="PHILIPCARB.NS">PHILIPCARB.NS</option>
+<option value="PHOENIXLTD.NS">PHOENIXLTD.NS</option>
+<option value="PIDILITIND.NS">PIDILITIND.NS</option>
+<option value="PIIND.NS">PIIND.NS</option>
+<option value="PILANIINVS.NS">PILANIINVS.NS</option>
+<option value="PILITA.NS">PILITA.NS</option>
+<option value="PIONDIST.NS">PIONDIST.NS</option>
+<option value="PIONEEREMB.NS">PIONEEREMB.NS</option>
+<option value="PITTIENG.NS">PITTIENG.NS</option>
+<option value="PKTEA.NS">PKTEA.NS</option>
+<option value="PLASTIBLEN.NS">PLASTIBLEN.NS</option>
+<option value="PNB.NS">PNB.NS</option>
+<option value="PNBGILTS.NS">PNBGILTS.NS</option>
+<option value="PNBHOUSING.NS">PNBHOUSING.NS</option>
+<option value="PNC.NS">PNC.NS</option>
+<option value="PNCINFRA.NS">PNCINFRA.NS</option>
+<option value="PODDARHOUS.NS">PODDARHOUS.NS</option>
+<option value="PODDARMENT.NS">PODDARMENT.NS</option>
+<option value="POKARNA.NS">POKARNA.NS</option>
+<option value="POLYCAB.NS">POLYCAB.NS</option>
+<option value="POLYMED.NS">POLYMED.NS</option>
+<option value="POLYPLEX.NS">POLYPLEX.NS</option>
+<option value="PONNIERODE.NS">PONNIERODE.NS</option>
+<option value="POONAWALLA.NS">POONAWALLA.NS</option>
+<option value="POWERGRID.NS">POWERGRID.NS</option>
+<option value="POWERINDIA.NS">POWERINDIA.NS</option>
+<option value="POWERMECH.NS">POWERMECH.NS</option>
+<option value="PPAP.NS">PPAP.NS</option>
+<option value="PPL.NS">PPL.NS</option>
+<option value="PRADIP.NS">PRADIP.NS</option>
+<option value="PRAENG.NS">PRAENG.NS</option>
+<option value="PRAJIND.NS">PRAJIND.NS</option>
+<option value="PRAKASH.NS">PRAKASH.NS</option>
+<option value="PRAKASHSTL.NS">PRAKASHSTL.NS</option>
+<option value="PRAXIS.NS">PRAXIS.NS</option>
+<option value="PRECAM.NS">PRECAM.NS</option>
+<option value="PRECOT.NS">PRECOT.NS</option>
+<option value="PRECWIRE.NS">PRECWIRE.NS</option>
+<option value="PREMEXPLN.NS">PREMEXPLN.NS</option>
+<option value="PREMIER.NS">PREMIER.NS</option>
+<option value="PREMIERPOL.NS">PREMIERPOL.NS</option>
+<option value="PRESSMN.NS">PRESSMN.NS</option>
+<option value="PRESTIGE.NS">PRESTIGE.NS</option>
+<option value="PRICOLLTD.NS">PRICOLLTD.NS</option>
+<option value="PRIMESECU.NS">PRIMESECU.NS</option>
+<option value="PRINCEPIPE.NS">PRINCEPIPE.NS</option>
+<option value="PRITIKAUTO.NS">PRITIKAUTO.NS</option>
+<option value="PRIVISCL.NS">PRIVISCL.NS</option>
+<option value="PROINDIA.NS">PROINDIA.NS</option>
+<option value="PROZONINTU.NS">PROZONINTU.NS</option>
+<option value="PRSMJOHNSN.NS">PRSMJOHNSN.NS</option>
+<option value="PSB.NS">PSB.NS</option>
+<option value="PSPPROJECT.NS">PSPPROJECT.NS</option>
+<option value="PTC.NS">PTC.NS</option>
+<option value="PTL.NS">PTL.NS</option>
+<option value="PUNJABCHEM.NS">PUNJABCHEM.NS</option>
+<option value="PUNJLLOYD.NS">PUNJLLOYD.NS</option>
+<option value="PURVA.NS">PURVA.NS</option>
+<option value="PVP.NS">PVP.NS</option>
+<option value="PVR.NS">PVR.NS</option>
+<option value="QUESS.NS">QUESS.NS</option>
+<option value="QUICKHEAL.NS">QUICKHEAL.NS</option>
+<option value="RADAAN.NS">RADAAN.NS</option>
+<option value="RADICO.NS">RADICO.NS</option>
+<option value="RADIOCITY.NS">RADIOCITY.NS</option>
+<option value="RAILTEL.NS">RAILTEL.NS</option>
+<option value="RAIN.NS">RAIN.NS</option>
+<option value="RAJESHEXPO.NS">RAJESHEXPO.NS</option>
+<option value="RAJMET.NS">RAJMET.NS</option>
+<option value="RAJRATAN.NS">RAJRATAN.NS</option>
+<option value="RAJRAYON.NS">RAJRAYON.NS</option>
+<option value="RAJSREESUG.NS">RAJSREESUG.NS</option>
+<option value="RAJTV.NS">RAJTV.NS</option>
+<option value="RALLIS.NS">RALLIS.NS</option>
+<option value="RAMANEWS.NS">RAMANEWS.NS</option>
+<option value="RAMASTEEL.NS">RAMASTEEL.NS</option>
+<option value="RAMCOCEM.NS">RAMCOCEM.NS</option>
+<option value="RAMCOIND.NS">RAMCOIND.NS</option>
+<option value="RAMCOSYS.NS">RAMCOSYS.NS</option>
+<option value="RAMKY.NS">RAMKY.NS</option>
+<option value="RANASUG.NS">RANASUG.NS</option>
+<option value="RANEENGINE.NS">RANEENGINE.NS</option>
+<option value="RANEHOLDIN.NS">RANEHOLDIN.NS</option>
+<option value="RATNAMANI.NS">RATNAMANI.NS</option>
+<option value="RAYMOND.NS">RAYMOND.NS</option>
+<option value="RBL.NS">RBL.NS</option>
+<option value="RBLBANK.NS">RBLBANK.NS</option>
+<option value="RCF.NS">RCF.NS</option>
+<option value="RCOM.NS">RCOM.NS</option>
+<option value="RECLTD.NS">RECLTD.NS</option>
+<option value="REDINGTON.NS">REDINGTON.NS</option>
+<option value="REFEX.NS">REFEX.NS</option>
+<option value="RELAXO.NS">RELAXO.NS</option>
+<option value="RELCAPITAL.NS">RELCAPITAL.NS</option>
+<option value="RELIANCE.NS">RELIANCE.NS</option>
+<option value="RELIGARE.NS">RELIGARE.NS</option>
+<option value="RELINFRA.NS">RELINFRA.NS</option>
+<option value="REMSONSIND.NS">REMSONSIND.NS</option>
+<option value="RENUKA.NS">RENUKA.NS</option>
+<option value="REPCOHOME.NS">REPCOHOME.NS</option>
+<option value="REPL.NS">REPL.NS</option>
+<option value="REPRO.NS">REPRO.NS</option>
+<option value="RESPONIND.NS">RESPONIND.NS</option>
+<option value="REVATHI.NS">REVATHI.NS</option>
+<option value="RGL.NS">RGL.NS</option>
+<option value="RHFL.NS">RHFL.NS</option>
+<option value="RHIM.NS">RHIM.NS</option>
+<option value="RICOAUTO.NS">RICOAUTO.NS</option>
+<option value="RIIL.NS">RIIL.NS</option>
+<option value="RITES.NS">RITES.NS</option>
+<option value="RKDL.NS">RKDL.NS</option>
+<option value="RKEC.NS">RKEC.NS</option>
+<option value="RKFORGE.NS">RKFORGE.NS</option>
+<option value="RMCL.NS">RMCL.NS</option>
+<option value="RML.NS">RML.NS</option>
+<option value="RNAVAL.NS">RNAVAL.NS</option>
+<option value="ROHITFERRO.NS">ROHITFERRO.NS</option>
+<option value="ROHLTD.NS">ROHLTD.NS</option>
+<option value="ROLEXRINGS.NS">ROLEXRINGS.NS</option>
+<option value="ROLLT.NS">ROLLT.NS</option>
+<option value="ROLTA.NS">ROLTA.NS</option>
+<option value="ROML.NS">ROML.NS</option>
+<option value="ROSSARI.NS">ROSSARI.NS</option>
+<option value="ROSSELLIND.NS">ROSSELLIND.NS</option>
+<option value="ROUTE.NS">ROUTE.NS</option>
+<option value="RPGLIFE.NS">RPGLIFE.NS</option>
+<option value="RPOWER.NS">RPOWER.NS</option>
+<option value="RPPINFRA.NS">RPPINFRA.NS</option>
+<option value="RPSGVENT.NS">RPSGVENT.NS</option>
+<option value="RSSOFTWARE.NS">RSSOFTWARE.NS</option>
+<option value="RSWM.NS">RSWM.NS</option>
+<option value="RSYSTEMS.NS">RSYSTEMS.NS</option>
+<option value="RTNINDIA.NS">RTNINDIA.NS</option>
+<option value="RTNPOWER.NS">RTNPOWER.NS</option>
+<option value="RUBYMILLS.NS">RUBYMILLS.NS</option>
+<option value="RUCHI.NS">RUCHI.NS</option>
+<option value="RUCHINFRA.NS">RUCHINFRA.NS</option>
+<option value="RUCHIRA.NS">RUCHIRA.NS</option>
+<option value="RUPA.NS">RUPA.NS</option>
+<option value="RUSHIL.NS">RUSHIL.NS</option>
+<option value="RVHL.NS">RVHL.NS</option>
+<option value="RVNL.NS">RVNL.NS</option>
+<option value="S&amp;SPOWER.NS">S&amp;SPOWER.NS</option>
+<option value="SABEVENTS.NS">SABEVENTS.NS</option>
+<option value="SADBHAV.NS">SADBHAV.NS</option>
+<option value="SADBHIN.NS">SADBHIN.NS</option>
+<option value="SAFARI.NS">SAFARI.NS</option>
+<option value="SAGARDEEP.NS">SAGARDEEP.NS</option>
+<option value="SAGCEM.NS">SAGCEM.NS</option>
+<option value="SAIL.NS">SAIL.NS</option>
+<option value="SAKAR.NS">SAKAR.NS</option>
+<option value="SAKHTISUG.NS">SAKHTISUG.NS</option>
+<option value="SAKSOFT.NS">SAKSOFT.NS</option>
+<option value="SAKUMA.NS">SAKUMA.NS</option>
+<option value="SALASAR.NS">SALASAR.NS</option>
+<option value="SALONA.NS">SALONA.NS</option>
+<option value="SALSTEEL.NS">SALSTEEL.NS</option>
+<option value="SALZERELEC.NS">SALZERELEC.NS</option>
+<option value="SAMBHAAV.NS">SAMBHAAV.NS</option>
+<option value="SANCO.NS">SANCO.NS</option>
+<option value="SANDESH.NS">SANDESH.NS</option>
+<option value="SANDHAR.NS">SANDHAR.NS</option>
+<option value="SANGAMIND.NS">SANGAMIND.NS</option>
+<option value="SANGHIIND.NS">SANGHIIND.NS</option>
+<option value="SANGHVIMOV.NS">SANGHVIMOV.NS</option>
+<option value="SANGINITA.NS">SANGINITA.NS</option>
+<option value="SANOFI.NS">SANOFI.NS</option>
+<option value="SANSERA.NS">SANSERA.NS</option>
+<option value="SANWARIA.NS">SANWARIA.NS</option>
+<option value="SARDAEN.NS">SARDAEN.NS</option>
+<option value="SAREGAMA.NS">SAREGAMA.NS</option>
+<option value="SARLAPOLY.NS">SARLAPOLY.NS</option>
+<option value="SASKEN.NS">SASKEN.NS</option>
+<option value="SASTASUNDR.NS">SASTASUNDR.NS</option>
+<option value="SATHAISPAT.NS">SATHAISPAT.NS</option>
+<option value="SATIA.NS">SATIA.NS</option>
+<option value="SATIN.NS">SATIN.NS</option>
+<option value="SBCL.NS">SBCL.NS</option>
+<option value="SBICARD.NS">SBICARD.NS</option>
+<option value="SBILIFE.NS">SBILIFE.NS</option>
+<option value="SBIN.NS">SBIN.NS</option>
+<option value="SCAPDVR.NS">SCAPDVR.NS</option>
+<option value="SCHAEFFLER.NS">SCHAEFFLER.NS</option>
+<option value="SCHAND.NS">SCHAND.NS</option>
+<option value="SCHNEIDER.NS">SCHNEIDER.NS</option>
+<option value="SCI.NS">SCI.NS</option>
+<option value="SDBL.NS">SDBL.NS</option>
+<option value="SEAMECLTD.NS">SEAMECLTD.NS</option>
+<option value="SECURKLOUD.NS">SECURKLOUD.NS</option>
+<option value="SELAN.NS">SELAN.NS</option>
+<option value="SEPOWER.NS">SEPOWER.NS</option>
+<option value="SEQUENT.NS">SEQUENT.NS</option>
+<option value="SERVOTECH.NS">SERVOTECH.NS</option>
+<option value="SESHAPAPER.NS">SESHAPAPER.NS</option>
+<option value="SETCO.NS">SETCO.NS</option>
+<option value="SETUINFRA.NS">SETUINFRA.NS</option>
+<option value="SEYAIND.NS">SEYAIND.NS</option>
+<option value="SFL.NS">SFL.NS</option>
+<option value="SGIL.NS">SGIL.NS</option>
+<option value="SGL.NS">SGL.NS</option>
+<option value="SHAHALLOYS.NS">SHAHALLOYS.NS</option>
+<option value="SHAKTIPUMP.NS">SHAKTIPUMP.NS</option>
+<option value="SHALBY.NS">SHALBY.NS</option>
+<option value="SHALPAINTS.NS">SHALPAINTS.NS</option>
+<option value="SHANKARA.NS">SHANKARA.NS</option>
+<option value="SHANTI.NS">SHANTI.NS</option>
+<option value="SHANTIGEAR.NS">SHANTIGEAR.NS</option>
+<option value="SHARDACROP.NS">SHARDACROP.NS</option>
+<option value="SHARDAMOTR.NS">SHARDAMOTR.NS</option>
+<option value="SHAREINDIA.NS">SHAREINDIA.NS</option>
+<option value="SHEMAROO.NS">SHEMAROO.NS</option>
+<option value="SHIL.NS">SHIL.NS</option>
+<option value="SHILPAMED.NS">SHILPAMED.NS</option>
+<option value="SHIVAMAUTO.NS">SHIVAMAUTO.NS</option>
+<option value="SHIVAMILLS.NS">SHIVAMILLS.NS</option>
+<option value="SHIVATEX.NS">SHIVATEX.NS</option>
+<option value="SHK.NS">SHK.NS</option>
+<option value="SHOPERSTOP.NS">SHOPERSTOP.NS</option>
+<option value="SHRADHA.NS">SHRADHA.NS</option>
+<option value="SHREDIGCEM.NS">SHREDIGCEM.NS</option>
+<option value="SHREECEM.NS">SHREECEM.NS</option>
+<option value="SHREEPUSHK.NS">SHREEPUSHK.NS</option>
+<option value="SHREERAMA.NS">SHREERAMA.NS</option>
+<option value="SHRENIK.NS">SHRENIK.NS</option>
+<option value="SHREYANIND.NS">SHREYANIND.NS</option>
+<option value="SHREYAS.NS">SHREYAS.NS</option>
+<option value="SHRIPISTON.NS">SHRIPISTON.NS</option>
+<option value="SHRIRAMCIT.NS">SHRIRAMCIT.NS</option>
+<option value="SHRIRAMEPC.NS">SHRIRAMEPC.NS</option>
+<option value="SHYAMCENT.NS">SHYAMCENT.NS</option>
+<option value="SHYAMMETL.NS">SHYAMMETL.NS</option>
+<option value="SHYAMTEL.NS">SHYAMTEL.NS</option>
+<option value="SICAL.NS">SICAL.NS</option>
+<option value="SIEMENS.NS">SIEMENS.NS</option>
+<option value="SIGIND.NS">SIGIND.NS</option>
+<option value="SIL.NS">SIL.NS</option>
+<option value="SILGO.NS">SILGO.NS</option>
+<option value="SILINV.NS">SILINV.NS</option>
+<option value="SILLYMONKS.NS">SILLYMONKS.NS</option>
+<option value="SIMBHALS.NS">SIMBHALS.NS</option>
+<option value="SIMPLEXINF.NS">SIMPLEXINF.NS</option>
+<option value="SINTERCOM.NS">SINTERCOM.NS</option>
+<option value="SINTEX.NS">SINTEX.NS</option>
+<option value="SIRCA.NS">SIRCA.NS</option>
+<option value="SIS.NS">SIS.NS</option>
+<option value="SITINET.NS">SITINET.NS</option>
+<option value="SIYSIL.NS">SIYSIL.NS</option>
+<option value="SJVN.NS">SJVN.NS</option>
+<option value="SKFINDIA.NS">SKFINDIA.NS</option>
+<option value="SKIL.NS">SKIL.NS</option>
+<option value="SKIPPER.NS">SKIPPER.NS</option>
+<option value="SKMEGGPROD.NS">SKMEGGPROD.NS</option>
+<option value="SMARTLINK.NS">SMARTLINK.NS</option>
+<option value="SMCGLOBAL.NS">SMCGLOBAL.NS</option>
+<option value="SMLISUZU.NS">SMLISUZU.NS</option>
+<option value="SMSLIFE.NS">SMSLIFE.NS</option>
+<option value="SMSPHARMA.NS">SMSPHARMA.NS</option>
+<option value="SNOWMAN.NS">SNOWMAN.NS</option>
+<option value="SOBHA.NS">SOBHA.NS</option>
+<option value="SOLARA.NS">SOLARA.NS</option>
+<option value="SOLARINDS.NS">SOLARINDS.NS</option>
+<option value="SOMANYCERA.NS">SOMANYCERA.NS</option>
+<option value="SOMATEX.NS">SOMATEX.NS</option>
+<option value="SOMICONVEY.NS">SOMICONVEY.NS</option>
+<option value="SONACOMS.NS">SONACOMS.NS</option>
+<option value="SONATSOFTW.NS">SONATSOFTW.NS</option>
+<option value="SORILINFRA.NS">SORILINFRA.NS</option>
+<option value="SOTL.NS">SOTL.NS</option>
+<option value="SOUTHBANK.NS">SOUTHBANK.NS</option>
+<option value="SOUTHWEST.NS">SOUTHWEST.NS</option>
+<option value="SPAL.NS">SPAL.NS</option>
+<option value="SPANDANA.NS">SPANDANA.NS</option>
+<option value="SPARC.NS">SPARC.NS</option>
+<option value="SPECIALITY.NS">SPECIALITY.NS</option>
+<option value="SPENCERS.NS">SPENCERS.NS</option>
+<option value="SPENTEX.NS">SPENTEX.NS</option>
+<option value="SPIC.NS">SPIC.NS</option>
+<option value="SPICEJET.NS">SPICEJET.NS</option>
+<option value="SPLIL.NS">SPLIL.NS</option>
+<option value="SPMLINFRA.NS">SPMLINFRA.NS</option>
+<option value="SPTL.NS">SPTL.NS</option>
+<option value="SREEL.NS">SREEL.NS</option>
+<option value="SREINFRA.NS">SREINFRA.NS</option>
+<option value="SRF.NS">SRF.NS</option>
+<option value="SRHHYPOLTD.NS">SRHHYPOLTD.NS</option>
+<option value="SRIPIPES.NS">SRIPIPES.NS</option>
+<option value="SRPL.NS">SRPL.NS</option>
+<option value="SRTRANSFIN.NS">SRTRANSFIN.NS</option>
+<option value="SSWL.NS">SSWL.NS</option>
+<option value="STAR.NS">STAR.NS</option>
+<option value="STARCEMENT.NS">STARCEMENT.NS</option>
+<option value="STARPAPER.NS">STARPAPER.NS</option>
+<option value="STCINDIA.NS">STCINDIA.NS</option>
+<option value="STEELCITY.NS">STEELCITY.NS</option>
+<option value="STEELXIND.NS">STEELXIND.NS</option>
+<option value="STEL.NS">STEL.NS</option>
+<option value="STERTOOLS.NS">STERTOOLS.NS</option>
+<option value="STLTECH.NS">STLTECH.NS</option>
+<option value="STOVEKRAFT.NS">STOVEKRAFT.NS</option>
+<option value="STYLAMIND.NS">STYLAMIND.NS</option>
+<option value="SUBCAPCITY.NS">SUBCAPCITY.NS</option>
+<option value="SUBEXLTD.NS">SUBEXLTD.NS</option>
+<option value="SUBROS.NS">SUBROS.NS</option>
+<option value="SUDARSCHEM.NS">SUDARSCHEM.NS</option>
+<option value="SUMEETINDS.NS">SUMEETINDS.NS</option>
+<option value="SUMICHEM.NS">SUMICHEM.NS</option>
+<option value="SUMIT.NS">SUMIT.NS</option>
+<option value="SUMMITSEC.NS">SUMMITSEC.NS</option>
+<option value="SUNCLAYLTD.NS">SUNCLAYLTD.NS</option>
+<option value="SUNDARAM.NS">SUNDARAM.NS</option>
+<option value="SUNDARMFIN.NS">SUNDARMFIN.NS</option>
+<option value="SUNDARMHLD.NS">SUNDARMHLD.NS</option>
+<option value="SUNDRMBRAK.NS">SUNDRMBRAK.NS</option>
+<option value="SUNDRMFAST.NS">SUNDRMFAST.NS</option>
+<option value="SUNFLAG.NS">SUNFLAG.NS</option>
+<option value="SUNPHARMA.NS">SUNPHARMA.NS</option>
+<option value="SUNTECK.NS">SUNTECK.NS</option>
+<option value="SUNTV.NS">SUNTV.NS</option>
+<option value="SUPERHOUSE.NS">SUPERHOUSE.NS</option>
+<option value="SUPERSPIN.NS">SUPERSPIN.NS</option>
+<option value="SUPPETRO.NS">SUPPETRO.NS</option>
+<option value="SUPRAJIT.NS">SUPRAJIT.NS</option>
+<option value="SUPREMEENG.NS">SUPREMEENG.NS</option>
+<option value="SUPREMEIND.NS">SUPREMEIND.NS</option>
+<option value="SURANASOL.NS">SURANASOL.NS</option>
+<option value="SURANAT&amp;P.NS">SURANAT&amp;P.NS</option>
+<option value="SURYALAXMI.NS">SURYALAXMI.NS</option>
+<option value="SURYAROSNI.NS">SURYAROSNI.NS</option>
+<option value="SURYODAY.NS">SURYODAY.NS</option>
+<option value="SUTLEJTEX.NS">SUTLEJTEX.NS</option>
+<option value="SUULD.NS">SUULD.NS</option>
+<option value="SUVEN.NS">SUVEN.NS</option>
+<option value="SUVENPHAR.NS">SUVENPHAR.NS</option>
+<option value="SUVIDHAA.NS">SUVIDHAA.NS</option>
+<option value="SUZLON.NS">SUZLON.NS</option>
+<option value="SVPGLOB.NS">SVPGLOB.NS</option>
+<option value="SWANENERGY.NS">SWANENERGY.NS</option>
+<option value="SWARAJENG.NS">SWARAJENG.NS</option>
+<option value="SWELECTES.NS">SWELECTES.NS</option>
+<option value="SWSOLAR.NS">SWSOLAR.NS</option>
+<option value="SYMPHONY.NS">SYMPHONY.NS</option>
+<option value="SYNGENE.NS">SYNGENE.NS</option>
+<option value="TAINWALCHM.NS">TAINWALCHM.NS</option>
+<option value="TAJGVK.NS">TAJGVK.NS</option>
+<option value="TAKE.NS">TAKE.NS</option>
+<option value="TALBROAUTO.NS">TALBROAUTO.NS</option>
+<option value="TANLA.NS">TANLA.NS</option>
+<option value="TANTIACONS.NS">TANTIACONS.NS</option>
+<option value="TARAPUR.NS">TARAPUR.NS</option>
+<option value="TARC.NS">TARC.NS</option>
+<option value="TARMAT.NS">TARMAT.NS</option>
+<option value="TASTYBITE.NS">TASTYBITE.NS</option>
+<option value="TATACHEM.NS">TATACHEM.NS</option>
+<option value="TATACOFFEE.NS">TATACOFFEE.NS</option>
+<option value="TATACOMM.NS">TATACOMM.NS</option>
+<option value="TATACONSUM.NS">TATACONSUM.NS</option>
+<option value="TATAELXSI.NS">TATAELXSI.NS</option>
+<option value="TATAINVEST.NS">TATAINVEST.NS</option>
+<option value="TATAMETALI.NS">TATAMETALI.NS</option>
+<option value="TATAMOTORS.NS">TATAMOTORS.NS</option>
+<option value="TATAMTRDVR.NS">TATAMTRDVR.NS</option>
+<option value="TATAPOWER.NS">TATAPOWER.NS</option>
+<option value="TATASTEEL.NS">TATASTEEL.NS</option>
+<option value="TATASTLBSL.NS">TATASTLBSL.NS</option>
+<option value="TATASTLLP.NS">TATASTLLP.NS</option>
+<option value="TATVA.NS">TATVA.NS</option>
+<option value="TBZ.NS">TBZ.NS</option>
+<option value="TCI.NS">TCI.NS</option>
+<option value="TCIDEVELOP.NS">TCIDEVELOP.NS</option>
+<option value="TCIEXP.NS">TCIEXP.NS</option>
+<option value="TCIFINANCE.NS">TCIFINANCE.NS</option>
+<option value="TCNSBRANDS.NS">TCNSBRANDS.NS</option>
+<option value="TCPLPACK.NS">TCPLPACK.NS</option>
+<option value="TCS.NS">TCS.NS</option>
+<option value="TDPOWERSYS.NS">TDPOWERSYS.NS</option>
+<option value="TEAMLEASE.NS">TEAMLEASE.NS</option>
+<option value="TECHIN.NS">TECHIN.NS</option>
+<option value="TECHM.NS">TECHM.NS</option>
+<option value="TECHNOE.NS">TECHNOE.NS</option>
+<option value="TEJASNET.NS">TEJASNET.NS</option>
+<option value="TEMBO.NS">TEMBO.NS</option>
+<option value="TERASOFT.NS">TERASOFT.NS</option>
+<option value="TEXINFRA.NS">TEXINFRA.NS</option>
+<option value="TEXMOPIPES.NS">TEXMOPIPES.NS</option>
+<option value="TEXRAIL.NS">TEXRAIL.NS</option>
+<option value="TFCILTD.NS">TFCILTD.NS</option>
+<option value="TFL.NS">TFL.NS</option>
+<option value="TGBHOTELS.NS">TGBHOTELS.NS</option>
+<option value="THANGAMAYL.NS">THANGAMAYL.NS</option>
+<option value="THEINVEST.NS">THEINVEST.NS</option>
+<option value="THEMISMED.NS">THEMISMED.NS</option>
+<option value="THERMAX.NS">THERMAX.NS</option>
+<option value="THOMASCOOK.NS">THOMASCOOK.NS</option>
+<option value="THOMASCOTT.NS">THOMASCOTT.NS</option>
+<option value="THYROCARE.NS">THYROCARE.NS</option>
+<option value="TI.NS">TI.NS</option>
+<option value="TIDEWATER.NS">TIDEWATER.NS</option>
+<option value="TIIL.NS">TIIL.NS</option>
+<option value="TIINDIA.NS">TIINDIA.NS</option>
+<option value="TIJARIA.NS">TIJARIA.NS</option>
+<option value="TIL.NS">TIL.NS</option>
+<option value="TIMESGTY.NS">TIMESGTY.NS</option>
+<option value="TIMETECHNO.NS">TIMETECHNO.NS</option>
+<option value="TIMKEN.NS">TIMKEN.NS</option>
+<option value="TINPLATE.NS">TINPLATE.NS</option>
+<option value="TIPSINDLTD.NS">TIPSINDLTD.NS</option>
+<option value="TIRUMALCHM.NS">TIRUMALCHM.NS</option>
+<option value="TIRUPATIFL.NS">TIRUPATIFL.NS</option>
+<option value="TITAN.NS">TITAN.NS</option>
+<option value="TMRVL.NS">TMRVL.NS</option>
+<option value="TNPETRO.NS">TNPETRO.NS</option>
+<option value="TNPL.NS">TNPL.NS</option>
+<option value="TNTELE.NS">TNTELE.NS</option>
+<option value="TOKYOPLAST.NS">TOKYOPLAST.NS</option>
+<option value="TORNTPHARM.NS">TORNTPHARM.NS</option>
+<option value="TORNTPOWER.NS">TORNTPOWER.NS</option>
+<option value="TOTAL.NS">TOTAL.NS</option>
+<option value="TOUCHWOOD.NS">TOUCHWOOD.NS</option>
+<option value="TPLPLASTEH.NS">TPLPLASTEH.NS</option>
+<option value="TREEHOUSE.NS">TREEHOUSE.NS</option>
+<option value="TREJHARA.NS">TREJHARA.NS</option>
+<option value="TRENT.NS">TRENT.NS</option>
+<option value="TRF.NS">TRF.NS</option>
+<option value="TRIDENT.NS">TRIDENT.NS</option>
+<option value="TRIGYN.NS">TRIGYN.NS</option>
+<option value="TRIL.NS">TRIL.NS</option>
+<option value="TRITURBINE.NS">TRITURBINE.NS</option>
+<option value="TRIVENI.NS">TRIVENI.NS</option>
+<option value="TTKHLTCARE.NS">TTKHLTCARE.NS</option>
+<option value="TTKPRESTIG.NS">TTKPRESTIG.NS</option>
+<option value="TTL.NS">TTL.NS</option>
+<option value="TTML.NS">TTML.NS</option>
+<option value="TV18BRDCST.NS">TV18BRDCST.NS</option>
+<option value="TVSELECT.NS">TVSELECT.NS</option>
+<option value="TVSMOTOR.NS">TVSMOTOR.NS</option>
+<option value="TVSSRICHAK.NS">TVSSRICHAK.NS</option>
+<option value="TVTODAY.NS">TVTODAY.NS</option>
+<option value="TVVISION.NS">TVVISION.NS</option>
+<option value="TWL.NS">TWL.NS</option>
+<option value="UBL.NS">UBL.NS</option>
+<option value="UCALFUEL.NS">UCALFUEL.NS</option>
+<option value="UCOBANK.NS">UCOBANK.NS</option>
+<option value="UFLEX.NS">UFLEX.NS</option>
+<option value="UFO.NS">UFO.NS</option>
+<option value="UGARSUGAR.NS">UGARSUGAR.NS</option>
+<option value="UGROCAP.NS">UGROCAP.NS</option>
+<option value="UJAAS.NS">UJAAS.NS</option>
+<option value="UJJIVAN.NS">UJJIVAN.NS</option>
+<option value="UJJIVANSFB.NS">UJJIVANSFB.NS</option>
+<option value="ULTRACEMCO.NS">ULTRACEMCO.NS</option>
+<option value="UMANGDAIRY.NS">UMANGDAIRY.NS</option>
+<option value="UMESLTD.NS">UMESLTD.NS</option>
+<option value="UNICHEMLAB.NS">UNICHEMLAB.NS</option>
+<option value="UNIDT.NS">UNIDT.NS</option>
+<option value="UNIENTER.NS">UNIENTER.NS</option>
+<option value="UNIONBANK.NS">UNIONBANK.NS</option>
+<option value="UNITECH.NS">UNITECH.NS</option>
+<option value="UNITEDTEA.NS">UNITEDTEA.NS</option>
+<option value="UNIVASTU.NS">UNIVASTU.NS</option>
+<option value="UNIVCABLES.NS">UNIVCABLES.NS</option>
+<option value="UNIVPHOTO.NS">UNIVPHOTO.NS</option>
+<option value="UPL.NS">UPL.NS</option>
+<option value="URJA.NS">URJA.NS</option>
+<option value="USHAMART.NS">USHAMART.NS</option>
+<option value="UTIAMC.NS">UTIAMC.NS</option>
+<option value="UTTAMSTL.NS">UTTAMSTL.NS</option>
+<option value="UTTAMSUGAR.NS">UTTAMSUGAR.NS</option>
+<option value="V2RETAIL.NS">V2RETAIL.NS</option>
+<option value="VADILALIND.NS">VADILALIND.NS</option>
+<option value="VAIBHAVGBL.NS">VAIBHAVGBL.NS</option>
+<option value="VAISHALI.NS">VAISHALI.NS</option>
+<option value="VAKRANGEE.NS">VAKRANGEE.NS</option>
+<option value="VALIANTORG.NS">VALIANTORG.NS</option>
+<option value="VARDHACRLC.NS">VARDHACRLC.NS</option>
+<option value="VARDMNPOLY.NS">VARDMNPOLY.NS</option>
+<option value="VARROC.NS">VARROC.NS</option>
+<option value="VASCONEQ.NS">VASCONEQ.NS</option>
+<option value="VASWANI.NS">VASWANI.NS</option>
+<option value="VBL.NS">VBL.NS</option>
+<option value="VEDL.NS">VEDL.NS</option>
+<option value="VENKEYS.NS">VENKEYS.NS</option>
+<option value="VENUSREM.NS">VENUSREM.NS</option>
+<option value="VERTOZ.NS">VERTOZ.NS</option>
+<option value="VESUVIUS.NS">VESUVIUS.NS</option>
+<option value="VETO.NS">VETO.NS</option>
+<option value="VGUARD.NS">VGUARD.NS</option>
+<option value="VHL.NS">VHL.NS</option>
+<option value="VICEROY.NS">VICEROY.NS</option>
+<option value="VIDHIING.NS">VIDHIING.NS</option>
+<option value="VIJAYA.NS">VIJAYA.NS</option>
+<option value="VIJIFIN.NS">VIJIFIN.NS</option>
+<option value="VIKASECO.NS">VIKASECO.NS</option>
+<option value="VIKASLIFE.NS">VIKASLIFE.NS</option>
+<option value="VIKASPROP.NS">VIKASPROP.NS</option>
+<option value="VIKASWSP.NS">VIKASWSP.NS</option>
+<option value="VIMTALABS.NS">VIMTALABS.NS</option>
+<option value="VINATIORGA.NS">VINATIORGA.NS</option>
+<option value="VINDHYATEL.NS">VINDHYATEL.NS</option>
+<option value="VINEETLAB.NS">VINEETLAB.NS</option>
+<option value="VINYLINDIA.NS">VINYLINDIA.NS</option>
+<option value="VIPCLOTHNG.NS">VIPCLOTHNG.NS</option>
+<option value="VIPIND.NS">VIPIND.NS</option>
+<option value="VIPULLTD.NS">VIPULLTD.NS</option>
+<option value="VISAKAIND.NS">VISAKAIND.NS</option>
+<option value="VISASTEEL.NS">VISASTEEL.NS</option>
+<option value="VISHAL.NS">VISHAL.NS</option>
+<option value="VISHNU.NS">VISHNU.NS</option>
+<option value="VISHWARAJ.NS">VISHWARAJ.NS</option>
+<option value="VIVIDHA.NS">VIVIDHA.NS</option>
+<option value="VIVIMEDLAB.NS">VIVIMEDLAB.NS</option>
+<option value="VLSFINANCE.NS">VLSFINANCE.NS</option>
+<option value="VMART.NS">VMART.NS</option>
+<option value="VOLTAMP.NS">VOLTAMP.NS</option>
+<option value="VOLTAS.NS">VOLTAS.NS</option>
+<option value="VRLLOG.NS">VRLLOG.NS</option>
+<option value="VSSL.NS">VSSL.NS</option>
+<option value="VSTIND.NS">VSTIND.NS</option>
+<option value="VSTTILLERS.NS">VSTTILLERS.NS</option>
+<option value="VTL.NS">VTL.NS</option>
+<option value="WABAG.NS">WABAG.NS</option>
+<option value="WABCOINDIA.NS">WABCOINDIA.NS</option>
+<option value="WALCHANNAG.NS">WALCHANNAG.NS</option>
+<option value="WANBURY.NS">WANBURY.NS</option>
+<option value="WATERBASE.NS">WATERBASE.NS</option>
+<option value="WEALTH.NS">WEALTH.NS</option>
+<option value="WEBELSOLAR.NS">WEBELSOLAR.NS</option>
+<option value="WEIZMANIND.NS">WEIZMANIND.NS</option>
+<option value="WELCORP.NS">WELCORP.NS</option>
+<option value="WELENT.NS">WELENT.NS</option>
+<option value="WELINV.NS">WELINV.NS</option>
+<option value="WELSPUNIND.NS">WELSPUNIND.NS</option>
+<option value="WENDT.NS">WENDT.NS</option>
+<option value="WESTLIFE.NS">WESTLIFE.NS</option>
+<option value="WHEELS.NS">WHEELS.NS</option>
+<option value="WHIRLPOOL.NS">WHIRLPOOL.NS</option>
+<option value="WILLAMAGOR.NS">WILLAMAGOR.NS</option>
+<option value="WINDLAS.NS">WINDLAS.NS</option>
+<option value="WINDMACHIN.NS">WINDMACHIN.NS</option>
+<option value="WIPL.NS">WIPL.NS</option>
+<option value="WIPRO.NS">WIPRO.NS</option>
+<option value="WOCKPHARMA.NS">WOCKPHARMA.NS</option>
+<option value="WONDERLA.NS">WONDERLA.NS</option>
+<option value="WORTH.NS">WORTH.NS</option>
+<option value="WSI.NS">WSI.NS</option>
+<option value="WSTCSTPAPR.NS">WSTCSTPAPR.NS</option>
+<option value="XCHANGING.NS">XCHANGING.NS</option>
+<option value="XELPMOC.NS">XELPMOC.NS</option>
+<option value="XPROINDIA.NS">XPROINDIA.NS</option>
+<option value="YAARII.NS">YAARII.NS</option>
+<option value="YESBANK.NS">YESBANK.NS</option>
+<option value="YUKEN.NS">YUKEN.NS</option>
+<option value="ZEEL.NS">ZEEL.NS</option>
+<option value="ZEELEARN.NS">ZEELEARN.NS</option>
+<option value="ZEEMEDIA.NS">ZEEMEDIA.NS</option>
+<option value="ZENITHEXPO.NS">ZENITHEXPO.NS</option>
+<option value="ZENITHSTL.NS">ZENITHSTL.NS</option>
+<option value="ZENSARTECH.NS">ZENSARTECH.NS</option>
+<option value="ZENTEC.NS">ZENTEC.NS</option>
+<option value="ZODIACLOTH.NS">ZODIACLOTH.NS</option>
+<option value="ZOMATO.NS">ZOMATO.NS</option>
+<option value="ZOTA.NS">ZOTA.NS</option>
+<option value="ZUARI.NS">ZUARI.NS</option>
+<option value="ZUARIGLOB.NS">ZUARIGLOB.NS</option>
+<option value="ZYDUSWELL.NS">ZYDUSWELL.NS</option></select>
+<script type="application/json" data-for="symbol" data-nonempty="">{"plugins":["selectize-plugin-a11y"]}</script>
+</div>
+</div>
+<div class="form-group shiny-input-container">
+<label class="control-label" id="interval-label" for="interval">Get data interval for the symbol:</label>
+<div>
+<select id="interval"><option value="daily" selected>daily</option>
+<option value="weekly">weekly</option>
+<option value="monthly">monthly</option>
+<option value="yearly">yearly</option></select>
+<script type="application/json" data-for="interval" data-nonempty="">{"plugins":["selectize-plugin-a11y"]}</script>
+</div>
+</div>
+<div class="form-group shiny-input-container">
+<label class="control-label" id="nyears-label" for="nyears">Years of History</label>
+<input class="js-range-slider" id="nyears" data-skin="shiny" data-min="0.5" data-max="10" data-from="2" data-step="0.5" data-grid="true" data-grid-num="9.5" data-grid-snap="false" data-prettify-separator="," data-prettify-enabled="true" data-keyboard="true" data-data-type="number"/>
+</div>
+<div class="form-group shiny-input-container">
+<label class="control-label" id="nfor-label" for="nfor">Days to Forecast:</label>
+<div>
+<select id="nfor"><option value="5">5</option>
+<option value="10">10</option>
+<option value="25">25</option>
+<option value="50" selected>50</option>
+<option value="100">100</option></select>
+<script type="application/json" data-for="nfor" data-nonempty="">{"plugins":["selectize-plugin-a11y"]}</script>
+</div>
+</div>
+<div class="form-group shiny-input-container">
+<label class="control-label" id="seasonmode-label" for="seasonmode">Seasonality mode</label>
+<div>
+<select id="seasonmode"><option value="additive" selected>additive</option>
+<option value="multiplicative">multiplicative</option></select>
+<script type="application/json" data-for="seasonmode" data-nonempty="">{"plugins":["selectize-plugin-a11y"]}</script>
+</div>
+</div>
+<div class="form-group shiny-input-container">
+<label class="control-label" id="seasonscale-label" for="seasonscale">Seasonality prior scale</label>
+<input class="js-range-slider" id="seasonscale" data-skin="shiny" data-min="0.01" data-max="50" data-from="10" data-step="5" data-grid="true" data-grid-num="9.998" data-grid-snap="false" data-prettify-separator="," data-prettify-enabled="true" data-keyboard="true" data-data-type="number"/>
+</div>
+<p><br/></p>
 <div id="column" class="section level2" data-width="650">
 <h2>Column</h2>
 <div id="chart-a" class="section level3">
@@ -2609,6 +4449,7 @@ window.FlexDashboardComponents.push({
 </div>
 </div>
 </div>
+</div>
 
 </div>
 
@@ -2622,7 +4463,7 @@ $(document).ready(function () {
   // initialize mathjax
   var script = document.createElement("script");
   script.type = "text/javascript";
-  script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+  script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
   document.getElementsByTagName("head")[0].appendChild(script);
 
 });
@@ -2638,7 +4479,8 @@ $(document).ready(function () {
     defaultFigWidth: 576,
     defaultFigHeight: 460,
     defaultFigWidthMobile: 360,
-    defaultFigHeightMobile: 460
+    defaultFigHeightMobile: 460,
+    resize_reload: true
   });
 });
 </script>
